@@ -1,36 +1,56 @@
-# Generated files
-*.elc
-*-pkg.el
-*.tar
-TAGS
-doc/simple-indention.texi
-doc/simple-indention.info
 
-# Packages
-elpa
-/.cask
-dist
+# Created by https://www.toptal.com/developers/gitignore/api/emacs
+# Edit at https://www.toptal.com/developers/gitignore?templates=emacs
 
-# Ecukes
-/features/project/.cask
-/features/project/test/*.el
-.ecukes-failing-scenarios
-
-
-# Created by https://www.toptal.com/developers/gitignore/api/elisp
-# Edit at https://www.toptal.com/developers/gitignore?templates=elisp
-
-### Elisp ###
-# Compiled
-*.elc
-
-# Packaging
-.cask
-
-# Backup files
+### Emacs ###
+# -*- mode: gitignore; -*-
 *~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 
-# Undo-tree save-files
-*.~undo-tree
+# Org-mode
+.org-id-locations
+*_archive
 
-# End of https://www.toptal.com/developers/gitignore/api/elisp
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# Flycheck
+flycheck_*.el
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
+
+# directory configuration
+.dir-locals.el
+
+# network security
+/network-security.data
+
+
+# End of https://www.toptal.com/developers/gitignore/api/emacs
