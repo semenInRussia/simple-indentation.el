@@ -1,0 +1,36 @@
+# Generated files
+*.elc
+*-pkg.el
+*.tar
+TAGS
+doc/simple-indention.texi
+doc/simple-indention.info
+
+# Packages
+elpa
+/.cask
+dist
+
+# Ecukes
+/features/project/.cask
+/features/project/test/*.el
+.ecukes-failing-scenarios
+
+
+# Created by https://www.toptal.com/developers/gitignore/api/elisp
+# Edit at https://www.toptal.com/developers/gitignore?templates=elisp
+
+### Elisp ###
+# Compiled
+*.elc
+
+# Packaging
+.cask
+
+# Backup files
+*~
+
+# Undo-tree save-files
+*.~undo-tree
+
+# End of https://www.toptal.com/developers/gitignore/api/elisp
