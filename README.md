@@ -1,5 +1,5 @@
 # simple-indentation
-
+I (repo) renamed from `simple-indention` to `simple-indentation`, How bad that?
 ## Summary
 
 Simple Define Indent's Funcs for Your Cool Major Modes in Emacs
