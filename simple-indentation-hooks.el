@@ -1,10 +1,10 @@
-;;; simple-indention-hooks.el --- Operations on hooks -*- lexical-binding: t; -*-
+;;; simple-indentation-hooks.el --- Operations on hooks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 semenInRussia
 
 ;; Author: semenInRussia <hrams205@gmail.com>
 ;; Version: 0.0.1
-;; Homepage: https://github.com/semenInRussia/simple-indention.el
+;; Homepage: https://github.com/semenInRussia/simple-indentation.el
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,87 +27,89 @@
 
 (require 'dash)
 
-(require 'simple-indention-namespace)
+(require 'simple-indentation-namespace)
 
 
-(defmacro simple-indention-hooks-union-to (destination-hook &rest hooks)
+(defmacro simple-indentation-hooks-union-to (destination-hook &rest hooks)
     "Add hook to run DESTINATION-HOOK to HOOKS."
-    `(--each (list ,@hooks)
-        (add-hook it (lambda () (run-hooks ,destination-hook)))))
+    `(--each
+         (list ,@hooks)
+         (add-hook it (lambda () (run-hooks ,destination-hook)))))
 
 
-(defmacro simple-indention-hooks-union-from-namespace-to (namespace
-                                                          dest-hook
-                                                          &rest hooks)
+(defmacro simple-indentation-hooks-union-from-namespace-to (namespace dest-hook &rest hooks)
     "Add hook to run DEST-HOOK to HOOKS from NAMESPACE.
 Example:
-    (simple-indention-hooks-union-from-namespace-to calc
+    (simple-indentation-hooks-union-from-namespace-to calc
                                    embeded-hook
                                    embeded-mode-hook
                                    embedded-new-buffer-hook)
 
-    --→ (simple-indention-hooks-union-to 'calc-embedded-hook
+    --→ (simple-indentation-hooks-union-to 'calc-embedded-hook
                         'calc-embeded-mode-hook
                         'calc-embedded-new-buffer-hook)"
     (setq dest-hook
-          (simple-indention-namespace-for-symbols namespace dest-hook))
+          (simple-indentation-namespace-for-symbols namespace dest-hook))
     (->> hooks
-         (--map (simple-indention-namespace-for-symbols namespace it))
+         (--map
+          (simple-indentation-namespace-for-symbols namespace it))
          (-map (lambda (el) `(quote ,el)))
          (setq hooks))
-    `(simple-indention-hooks-union-to ',dest-hook ,@hooks))
+    `(simple-indentation-hooks-union-to ',dest-hook ,@hooks))
 
 
-(defmacro simple-indention-hooks-add-to-hook-from-namespace
-    (namespace hook function)
+(defmacro simple-indentation-hooks-add-to-hook-from-namespace (namespace hook function)
     "Add to the value of HOOK from NAMESPACE the function FUNCTION.
 FUNCTION is not added if already present."
-    (setq hook (simple-indention-namespace-for-symbols namespace hook))
+    (setq hook
+          (simple-indentation-namespace-for-symbols namespace hook))
     `(add-hook ',hook ,function))
 
 
-(defmacro simple-indention-hooks-from-namespace-add-hook
-    (namespace hook function)
+(defmacro simple-indentation-hooks-from-namespace-add-hook (namespace hook function)
     "Add to the value of HOOK from NAMESPACE the function FUNCTION.
 FUNCTION is not added if already present."
-    (setq hook (simple-indention-namespace-for-symbols namespace hook))
-    (setq function (simple-indention-namespace-for-symbols namespace function))
+    (setq hook
+          (simple-indentation-namespace-for-symbols namespace hook))
+    (setq function
+          (simple-indentation-namespace-for-symbols namespace function))
     `(add-hook ',hook #',function))
 
 
-(defmacro simple-indention-hooks-from-namespace-remove-hook
-    (namespace hook function)
+(defmacro simple-indentation-hooks-from-namespace-remove-hook (namespace hook function)
     "Remove to the value of HOOK from NAMESPACE the function FUNCTION.
 FUNCTION is not removed if already present."
-    (setq hook (simple-indention-namespace-for-symbols namespace hook))
+    (setq hook
+          (simple-indentation-namespace-for-symbols namespace hook))
     `(remove-hook ',hook
-                  #',(simple-indention-namespace-for-symbols namespace
-                                                             function)))
+                  #',(simple-indentation-namespace-for-symbols namespace
+                                                               function)))
 
 
-(defmacro simple-indention-hooks-remove-from-hook-from-namespace
-    (namespace hook function)
+(defmacro simple-indentation-hooks-remove-from-hook-from-namespace (namespace hook function)
     "Add to the value of HOOK from NAMESPACE the function FUNCTION.
 FUNCTION is not added if already present."
-    (setq hook (simple-indention-namespace-for-symbols namespace hook))
+    (setq hook
+          (simple-indentation-namespace-for-symbols namespace hook))
     `(remove-hook ',hook ,function))
 
 
-(defmacro simple-indention-hooks-run-from-namespace (namespace &rest hooks)
+(defmacro simple-indentation-hooks-run-from-namespace (namespace &rest hooks)
     "Run all HOOKS from NAMESPACE."
     (->> hooks
-         (--map (simple-indention-namespace-for-symbols namespace it))
+         (--map
+          (simple-indentation-namespace-for-symbols namespace it))
          (-map (lambda (el) `(quote ,el)))
          (setq hooks))
     `(run-hooks ,@hooks))
 
-(defmacro simple-indention-hooks-from-namespace (namespace)
+(defmacro simple-indentation-hooks-from-namespace (namespace)
     "Return hooks of NAMESPACE.
 For example:
 python => python-hook;
 clang => clang-hook;"
-    `(simple-indention-namespace-from ,namespace hook))
+    `(simple-indentation-namespace-from ,namespace hook))
 
 
-(provide 'simple-indention-hooks)
-;;; simple-indention-hooks.el ends here
+(provide 'simple-indentation-hooks)
+;;; simple-indentation-hooks.el ends here

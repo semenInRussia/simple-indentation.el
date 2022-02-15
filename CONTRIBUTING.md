@@ -24,8 +24,8 @@ repository. Follow the guidelines below to make sure everything goes smoothly.
 
 ### Naming
 
-- Use a `simple-indention-` prefix for all public names.
-- Use a `simple-indention--` prefix for all internal names.
+- Use a `simple-indentation-` prefix for all public names.
+- Use a `simple-indentation--` prefix for all internal names.
 
 ### Docstrings
 

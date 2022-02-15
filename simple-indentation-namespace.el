@@ -1,10 +1,10 @@
-;;; simple-indention-namespace.el --- Operations on namespaces -*- lexical-binding: t; -*-
+;;; simple-indentation-namespace.el --- Operations on namespaces -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 semenInRussia
 
 ;; Author: semenInRussia <hrams205@gmail.com>
 ;; Version: 0.0.1
-;; Homepage: https://github.com/semenInRussia/simple-indention.el
+;; Homepage: https://github.com/semenInRussia/simple-indentation.el
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 ;; This package created for work on namespaces, example of work on namespaces:
 
-;; (simple-indention-namespace-from python hook) => 'python-hook
+;; (simple-indentation-namespace-from python hook) => 'python-hook
 ;;
 ;; (funcall-from-namespace python indent-line-function)
 ;;       => (python-indent-function)
@@ -33,48 +33,48 @@
 (require 'dash)
 (require 's)
 
-(defmacro simple-indention-namespace-defun ;nofmt
+(defmacro simple-indentation-namespace-defun ;nofmt
     (namespace func-name arglist docstring &rest body)
     "Define function in `NAMESPACE` with name `FUNC-NAME`.
 With respective `ARGLIST`, `DOCSTRING` and `BODY`."
-    `(defun ,(simple-indention-namespace-for-symbols namespace func-name)
+    `(defun ,(simple-indentation-namespace-for-symbols namespace func-name)
          ,arglist
          ,docstring
          ,@body))
 
 
-(defmacro simple-indention-namespace-defcustom ;nofmt
+(defmacro simple-indentation-namespace-defcustom ;nofmt
     (namespace var-name standard docstring &rest args)
     "Define custom variable from `NAMESPACE`.
 `VAR-NAME` is name of variable.  `STANDARD` is default value of variable.
 `DOCSTRING` is documentation's string for variable.  `ARGS` is additional
 arguments for `defcustom`."
-    `(defcustom ,(simple-indention-namespace-for-symbols namespace var-name)
+    `(defcustom ,(simple-indentation-namespace-for-symbols namespace var-name)
        ,standard
        ,docstring
        ,@args))
 
 
-(defmacro simple-indention-namespace-funcall (namespace func-name &rest args)
+(defmacro simple-indentation-namespace-funcall (namespace func-name &rest args)
     "Call function with FUNC-NAME from NAMESPACE with ARGS."
-    `(,(simple-indention-namespace-for-symbols namespace func-name)
+    `(,(simple-indentation-namespace-for-symbols namespace func-name)
        ,@args))
 
 
-(defmacro simple-indention-namespace-var (namespace var-name)
+(defmacro simple-indentation-namespace-var (namespace var-name)
     "Get something symbol with `VAR-NAME` from `NAMESPACE`."
     `(eval
-      ,(simple-indention-namespace-for-symbols namespace var-name)))
+      ,(simple-indentation-namespace-for-symbols namespace var-name)))
 
 
-(defmacro simple-indention-namespace-setq (namespace var-name value)
+(defmacro simple-indentation-namespace-setq (namespace var-name value)
     "Setq var with VAR-NAME from NAMESPACE to VALUE."
     `(set
-      (simple-indention-namespace-from ,namespace ,var-name)
+      (simple-indentation-namespace-from ,namespace ,var-name)
       ,value))
 
 
-(defmacro simple-indention-namespace-from (namespace something-name)
+(defmacro simple-indentation-namespace-from (namespace something-name)
     "Get something symbol with `SOMETHING-NAME` from `NAMESPACE`."
     `(intern
       ,(s-concat
@@ -83,7 +83,7 @@ arguments for `defcustom`."
         (symbol-name something-name))))
 
 
-(defun simple-indention-namespace-for-symbols ;nofmt
+(defun simple-indentation-namespace-for-symbols ;nofmt
     (namespace-symb something-name-symb)
     "Get symbol with SOMETHING-NAME-SYMB from NAMESPACE-SYMB."
     (intern
@@ -92,5 +92,5 @@ arguments for `defcustom`."
       "-"
       (symbol-name something-name-symb))))
 
-(provide 'simple-indention-namespace)
-;;; simple-indention-namespace.el ends here
+(provide 'simple-indentation-namespace)
+;;; simple-indentation-namespace.el ends here

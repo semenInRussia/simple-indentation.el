@@ -1,9 +1,9 @@
-# `simple-indention-rules-make` --- Simple Indention
+# `simple-indentation-rules-make` --- Simple Indention
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [`rules-make` --- Simple Indention](#rules-make-----simple-indention)
+- [`rules-make` --- Simple Indention](#rules-make-----simple-indentation)
     - [General Termins](#general-termins)
     - [Run and Check Rules](#run-and-check-rules)
     - [:predicate](#predicate)
@@ -29,7 +29,7 @@ Predicate defaults to function always return t.
 For create use:
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :predicate (lambda () (eq (% (line-number-at-pos) 2) 0))
  :indent-func (lambda () (insert "   ")))
 ```
@@ -38,16 +38,16 @@ For details see below!
 
 
 ## Run and Check Rules
-For this `simple-indention` has 3 functions:
-  * `simple-indention-rules-indent-current-line-p`
-  * `simple-indention-rules-call-indent-function`
-  * `simple-indention-rules-indent-current-line-with-func-p`
+For this `simple-indentation` has 3 functions:
+  * `simple-indentation-rules-indent-current-line-p`
+  * `simple-indentation-rules-call-indent-function`
+  * `simple-indentation-rules-indent-current-line-with-func-p`
   
-`simple-indention-rules-indent-current-line-p` take rule, and return t, when this rule needs to indent current line.
+`simple-indentation-rules-indent-current-line-p` take rule, and return t, when this rule needs to indent current line.
 
-`simple-indention-rules-call-indent-function` take rule, and call `indent-func` of this rule.
+`simple-indentation-rules-call-indent-function` take rule, and call `indent-func` of this rule.
 
-`simple-indention-rules-indent-current-line-with-func-p` is more high level function, take list of rules, search first rule needs to indent current line, and run `indent-func` of this rule.
+`simple-indentation-rules-indent-current-line-with-func-p` is more high level function, take list of rules, search first rule needs to indent current line, and run `indent-func` of this rule.
 
 ## Mangaing with Predicates
 ### :predicate
@@ -56,7 +56,7 @@ Each rule can has some predicates.  If rule has (1+) predicates, then main predi
 
 Example
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :predicate (lambda () (eq (% (line-number-at-pos) 2) 0))
  :predicate (lambda () (eq (% (line-number-at-pos) 3) 0)))
 ```
@@ -68,7 +68,7 @@ This is just goto previous line before check predicate, if goto previous line is
 *NOTE*: add `:check-on-prev-line` after predicate, before you want goto previous line
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :predicate (lambda () (eq (% (line-number-at-pos) 2) 0))
  :check-on-prev-line)
 ```
@@ -86,7 +86,7 @@ If predicate get nil in current line, then go to previous line and check predica
 Example:
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars "!"
  :on-current-or-previous-line)
 ```
@@ -100,7 +100,7 @@ If predicate get nil in current line, then go to previous code line (see [:check
 Example:
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars "!"
  :on-current-or-previous-code-line)
 ```
@@ -114,7 +114,7 @@ If predicate get nil in current line, then go to previous text line (see [:check
 Example:
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars "!"
  :on-current-or-previous-text-line)
 ```
@@ -127,13 +127,13 @@ This keywords needs to required folowed argument - list of strings (keywords).
 
 Example (super simple):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-keywords "end" "endif" "endfor")
 ```
 
 Example 2 (with `:check-on-prev-code-line`):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-keywords "end" "endif" "endfor"
  :check-on-prev-code-line)
  ```
@@ -147,13 +147,13 @@ This keywords needs to required folowed argument - list of strings (keywords).
 
 Example (super simple):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-keywords-in-code "end" "endif" "endfor")
 ```
 
 Example 2 (with `:check-on-prev-code-line`):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-keywords-in-code "end" "endif" "endfor"
  :check-on-prev-code-line)
  ```
@@ -168,13 +168,13 @@ This keywords needs to required folowed argument - string (chars).
 
 Example (super simple):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars "{}")
 ```
 
 Example 2 (with `:check-on-prev-code-line`):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars "{}
  :check-on-prev-code-line)
  ```
@@ -187,13 +187,13 @@ This keywords needs to required folowed argument - string (chars).
 
 Example (super simple):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars-in-code "{}")
 ```
 
 Example 2 (with `:check-on-prev-code-line`):
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :on-chars-in-code "{}"
  :check-on-prev-code-line)
  ```
@@ -207,21 +207,21 @@ Very important, that `:check-on-prev-code-line` go after `:on-chars` in section 
 
 Example:
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :indent-func (lambda () (insert "    ")))
 ```
 ### :add-indent
-Set `indent-func` of current rule to function on value of `simple-indention-increment-indent-level-function`, this variable automatic set after run one of functions defines by `simple-indention-define-for-major-mode`, by idea this function just insert `one-indent` for current major mode.
+Set `indent-func` of current rule to function on value of `simple-indentation-increment-indent-level-function`, this variable automatic set after run one of functions defines by `simple-indentation-define-for-major-mode`, by idea this function just insert `one-indent` for current major mode.
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :add-indent)
 ```
 
 ### :deindent
-Set `indent-func` of current rule to function on value of `simple-indention-decrement-indent-level-function`, this variable automatic set after run one of functions defines by `simple-indention-define-for-major-mode`, by idea this function chop `one-indent` when current line start with `one-indent`.
+Set `indent-func` of current rule to function on value of `simple-indentation-decrement-indent-level-function`, this variable automatic set after run one of functions defines by `simple-indentation-define-for-major-mode`, by idea this function chop `one-indent` when current line start with `one-indent`.
 
 ```elisp
-(simple-indention-rules-make
+(simple-indentation-rules-make
  :deindent)
 ```

@@ -1,4 +1,4 @@
-;;; test-helper.el --- Helper functions to test simple-indention  -*- lexical-binding: t; -*-
+;;; test-helper.el --- Helper functions to test simple-indentation  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022 Semen Khramtsov
 
@@ -23,11 +23,11 @@
 
 ;;; Code:
 
-(require 'simple-indention-namespace)
+(require 'simple-indentation-namespace)
 
 (declare-function undercover "undercover")
 
-(defmacro simple-indention-with-define-for-major-mode (args &rest body)
+(defmacro simple-indentation-with-define-for-major-mode (args &rest body)
     "Set indent things in BODY to funcs created by `define-for-major-mode' ARGS.
 Indent things:
 - `indent-region-function'
@@ -36,34 +36,34 @@ Indent things:
 - `each-line-after-indent-hook'"
     (let* ((special-major-mode (gensym))
            (new-indent-region
-            (simple-indention-namespace-for-symbols special-major-mode
-                                                    'indent-region))
+            (simple-indentation-namespace-for-symbols special-major-mode
+                                                      'indent-region))
            (new-indent-line
-            (simple-indention-namespace-for-symbols special-major-mode
-                                                    'indent-line))
+            (simple-indentation-namespace-for-symbols special-major-mode
+                                                      'indent-line))
            (each-line-before-indent-hook
-            (simple-indention-namespace-for-symbols
+            (simple-indentation-namespace-for-symbols
              special-major-mode 'each-line-before-indent-hook))
            (each-line-after-indent-hook
-            (simple-indention-namespace-for-symbols
+            (simple-indentation-namespace-for-symbols
              special-major-mode 'each-line-after-indent-hook)))
         `(with-temp-buffer
              (let ((each-line-before-indent-hook ',each-line-before-indent-hook)
                    (each-line-after-indent-hook ',each-line-after-indent-hook))
-                 (simple-indention-define-for-major-mode ,special-major-mode
-                                                         ,special-major-mode
-                                                         ,@args)
+                 (simple-indentation-define-for-major-mode ,special-major-mode
+                                                           ,special-major-mode
+                                                           ,@args)
                  (setq-local indent-line-function ',new-indent-line)
                  (setq-local indent-region-function ',new-indent-region)
                  ,@body))))
 
 
-(defun simple-indention-test-always-42 (&rest _)
+(defun simple-indentation-test-always-42 (&rest _)
     "Always, always return 42."
     42)
 
 (when (require 'undercover nil t)
-    (undercover "simple-indention.el"))
+    (undercover "simple-indentation.el"))
 
 
 ;;; test-helper.el ends here
