@@ -334,8 +334,9 @@ Return new rule."
      'simple-indentation-utils-compose-with-prev-code-line rule))
 
 
-(defun simple-indentation-rules-handler-on-current-or-previous-line (rule &rest _)
-    "Handler of `:on-current-or-previous-line' in `simple-indentation-rules-make'.
+(defun simple-indentation-rules-handler-on-current-or-previous-line (rule ;nofmt
+                                                                     &rest _)
+    "Handler of `:on-current-or-previous-line' in rules-make.
 Return new modified RULE."
     (simple-indentation-rules-set-predicate
      (simple-indentation-rules-utils-or-run-func-before-indent-current-line-p
@@ -343,7 +344,9 @@ Return new modified RULE."
      rule))
 
 
-(defun simple-indentation-rules-handler-on-current-or-previous-text-line (rule &rest _)
+(defun simple-indentation-rules-handler-on-current-or-previous-text-line (rule ;nofmt
+                                                                          &rest
+                                                                            _)
     "Handler of `:on-current-or-previous-text-line' in `rules-make'.
 Return new modified RULE."
     (simple-indentation-rules-set-predicate
@@ -352,7 +355,10 @@ Return new modified RULE."
      rule))
 
 
-(defun simple-indentation-rules-handler-on-current-or-previous-code-line (rule &rest _)
+(defun simple-indentation-rules-handler-on-current-or-previous-code-line (rule
+                                                                          ;;nofmt
+                                                                          &rest
+                                                                            _)
     "Handler of `:on-current-or-previous-code-line' in `rules-make'.
 Return new modified RULE."
     (simple-indentation-rules-set-predicate
