@@ -28,78 +28,72 @@
 (require 'ert)
 (require 'simple-indentation)
 
-
 (ert-deftest simple-indentation-test-define-for-major-mode-empty-rules
     ()
-    (let ((text "this\ndon't\nindented"))
-        (simple-indentation-with-define-for-major-mode
-         (:rules nil)
-         (insert text)
-         (funcall indent-line-function)
-         (should (equal (buffer-string) text))
-         (indent-region (point-min) (point-max))
-         (should (equal (buffer-string) text)))))
-
+  (let ((text "this\ndon't\nindented"))
+    (simple-indentation-with-define-for-major-mode
+     (:rules nil)
+     (insert text)
+     (funcall indent-line-function)
+     (should (equal (buffer-string) text))
+     (indent-region (point-min) (point-max))
+     (should (equal (buffer-string) text)))))
 
 (ert-deftest simple-indentation-test-define-for-major-mode-clear-empty-lines
     ()
-    (simple-indentation-with-define-for-major-mode
-     nil
-     (insert "folowing sheet
-                  
+  (simple-indentation-with-define-for-major-mode
+   nil
+   (insert "folowing sheet
+
 will cleared")
-     (indent-region (point-min) (point-max))
-     (should (equal (buffer-string) "folowing sheet
+   (indent-region (point-min) (point-max))
+   (should (equal (buffer-string) "folowing sheet
 
 will cleared"))))
 
-
 (ert-deftest simple-indentation-test-define-for-major-mode-not-clear-empty-lines
     ()
-    (simple-indentation-with-define-for-major-mode
-     (:clear-empty-lines nil :copy-indention-of-previous-line nil)
-     (let ((text "folowing sheet
-                  
-will not cleared"))
-         (insert text)
-         (indent-region (point-min) (point-max))
-         (funcall indent-line-function)
-         (should (equal (buffer-string) text)))))
+  (simple-indentation-with-define-for-major-mode
+   (:clear-empty-lines nil :copy-indention-of-previous-line nil)
+   (let ((text "folowing sheet
 
+will not cleared"))
+     (insert text)
+     (indent-region (point-min) (point-max))
+     (funcall indent-line-function)
+     (should (equal (buffer-string) text)))))
 
 (ert-deftest
     simple-indentation-define-for-major-mode-test-copy-indention-of-prev-line
     ()
-    (simple-indentation-with-define-for-major-mode
-     nil
-     (insert "   this indent from 3 spaces will copied")
-     (newline)
-     (funcall indent-line-function)
-     (should (equal "   " (thing-at-point 'line t)))))
-
+  (simple-indentation-with-define-for-major-mode
+   nil
+   (insert "   this indent from 3 spaces will copied")
+   (newline)
+   (funcall indent-line-function)
+   (should (equal "   " (thing-at-point 'line t)))))
 
 (ert-deftest simple-indentation-define-for-major-mode-test-clear-old-indent
     ()
-    (simple-indentation-with-define-for-major-mode
-     (:clear-old-indention t :copy-indention-of-previous-line nil)
-     (insert "   this indent cleared")
-     (funcall indent-line-function)
-     (should (equal "this indent cleared" (buffer-string)))))
-
+  (simple-indentation-with-define-for-major-mode
+   (:clear-old-indention t :copy-indention-of-previous-line nil)
+   (insert "   this indent cleared")
+   (funcall indent-line-function)
+   (should (equal "this indent cleared" (buffer-string)))))
 
 (ert-deftest simple-indentation-define-for-major-mode-test-each-line-hooks
     ()
-    (simple-indentation-with-define-for-major-mode
-     nil
-     (insert "\n\n\n")
-     (add-hook each-line-before-indent-hook
-               (lambda () (beginning-of-line) (insert "ANGEL")))
-     (add-hook each-line-after-indent-hook
-               (lambda () (beginning-of-line) (insert "B")))
-     (add-hook each-line-after-indent-hook
-               (lambda () (end-of-line) (backward-delete-char 2)))
-     (indent-region (point-min) (point-max))
-     (should (equal "BANG\nBANG\nBANG\n"(buffer-string)))))
+  (simple-indentation-with-define-for-major-mode
+   nil
+   (insert "\n\n\n")
+   (add-hook each-line-before-indent-hook
+             (lambda () (beginning-of-line) (insert "ANGEL")))
+   (add-hook each-line-after-indent-hook
+             (lambda () (beginning-of-line) (insert "B")))
+   (add-hook each-line-after-indent-hook
+             (lambda () (end-of-line) (backward-delete-char 2)))
+   (indent-region (point-min) (point-max))
+   (should (equal "BANG\nBANG\nBANG\n"(buffer-string)))))
 
 (provide 'simple-indentation-test)
 

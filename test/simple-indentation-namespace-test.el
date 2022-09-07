@@ -30,71 +30,65 @@
 
 (ert-deftest simple-indentation-namespace-test-from
     ()
-    (should
-     (eq
-      (simple-indentation-namespace-from python indent-line)
-      'python-indent-line)))
-
-
-(ert-deftest simple-indentation-namespace-test-for-symbols
-    ()
-    (should
-     (eq
-      (simple-indentation-namespace-for-symbols 'python 'indent-line)
-      'python-indent-line)))
-
+  (should
+   (eq
+    (simple-indentation-namespace-from python indent-line)
+    'python-indent-line)))
 
 (ert-deftest simple-indentation-namespace-test-for-symbols
     ()
-    (should
-     (equal
-      (macroexpand-1
-       '(simple-indentation-namespace-defun python print
-         ()
-         "Doc."
-         (interactive "dkd")
-         (message "body")))
-      '(defun python-print ()
-        "Doc."
-        (interactive "dkd")
-        (message "body")))))
-
+  (should
+   (eq
+    (simple-indentation-namespace-for-symbols 'python 'indent-line)
+    'python-indent-line)))
 
 (ert-deftest simple-indentation-namespace-test-for-symbols
     ()
-    (should
-     (equal
-      (macroexpand-1
-       '(simple-indentation-namespace-defcustom
-         python name
-         "Doc."
-         :group 'sheet))
-      '(defcustom python-name "Doc." :group 'sheet))))
+  (should
+   (equal
+    (macroexpand-1
+     '(simple-indentation-namespace-defun python print
+       ()
+       "Doc."
+       (interactive "dkd")
+       (message "body")))
+    '(defun python-print ()
+      "Doc."
+      (interactive "dkd")
+      (message "body")))))
 
+(ert-deftest simple-indentation-namespace-test-for-symbols
+    ()
+  (should
+   (equal
+    (macroexpand-1
+     '(simple-indentation-namespace-defcustom
+       python name
+       "Doc."
+       :group 'sheet))
+    '(defcustom python-name "Doc." :group 'sheet))))
 
 (ert-deftest
     simple-indentation-namespace-test-var()
-    (should
-     (equal
-      (macroexpand-1
-       '(simple-indentation-namespace-var python stupid-var))
-      '(eval python-stupid-var))))
-
+  (should
+   (equal
+    (macroexpand-1
+     '(simple-indentation-namespace-var python stupid-var))
+    '(eval python-stupid-var))))
 
 (ert-deftest simple-indentation-namespace-test-setq
     ()
-    (let ((tst-var 0))
-        (simple-indentation-namespace-setq tst var "Something.")
-        (should (equal tst-var "Something."))))
-
+  (let ((tst-var 0))
+    (simple-indentation-namespace-setq tst var "Something.")
+    (should (equal tst-var "Something."))))
 
 (ert-deftest simple-indentation-namespace-test-funcall
     ()
-    ;; We have fun (simple-indentation-test-always-42), it's always return 42
-    (should
-     (eq
-      (simple-indentation-namespace-funcall simple-indentation-test
-                                            always-42)
-      42)))
+  ;; We have fun (simple-indentation-test-always-42), it's always return 42
+  (should
+   (eq
+    (simple-indentation-namespace-funcall simple-indentation-test
+                                          always-42)
+    42)))
 
 ;;; simple-indentation-namespace-test.el ends here

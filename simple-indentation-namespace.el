@@ -35,62 +35,56 @@
 
 (defmacro simple-indentation-namespace-defun ;nofmt
     (namespace func-name arglist docstring &rest body)
-    "Define function in `NAMESPACE` with name `FUNC-NAME`.
+  "Define function in `NAMESPACE` with name `FUNC-NAME`.
 With respective `ARGLIST`, `DOCSTRING` and `BODY`."
-    `(defun ,(simple-indentation-namespace-for-symbols namespace func-name)
-         ,arglist
-         ,docstring
-         ,@body))
-
+  `(defun ,(simple-indentation-namespace-for-symbols namespace func-name)
+       ,arglist
+     ,docstring
+     ,@body))
 
 (defmacro simple-indentation-namespace-defcustom ;nofmt
     (namespace var-name standard docstring &rest args)
-    "Define custom variable from `NAMESPACE`.
+  "Define custom variable from `NAMESPACE`.
 `VAR-NAME` is name of variable.  `STANDARD` is default value of variable.
 `DOCSTRING` is documentation's string for variable.  `ARGS` is additional
 arguments for `defcustom`."
-    `(defcustom ,(simple-indentation-namespace-for-symbols namespace var-name)
-       ,standard
-       ,docstring
-       ,@args))
-
+  `(defcustom ,(simple-indentation-namespace-for-symbols namespace var-name)
+     ,standard
+     ,docstring
+     ,@args))
 
 (defmacro simple-indentation-namespace-funcall (namespace func-name &rest args)
-    "Call function with FUNC-NAME from NAMESPACE with ARGS."
-    `(,(simple-indentation-namespace-for-symbols namespace func-name)
-       ,@args))
-
+  "Call function with FUNC-NAME from NAMESPACE with ARGS."
+  `(,(simple-indentation-namespace-for-symbols namespace func-name)
+     ,@args))
 
 (defmacro simple-indentation-namespace-var (namespace var-name)
-    "Get something symbol with `VAR-NAME` from `NAMESPACE`."
-    `(eval
-      ,(simple-indentation-namespace-for-symbols namespace var-name)))
-
+  "Get something symbol with `VAR-NAME` from `NAMESPACE`."
+  `(eval
+    ,(simple-indentation-namespace-for-symbols namespace var-name)))
 
 (defmacro simple-indentation-namespace-setq (namespace var-name value)
-    "Setq var with VAR-NAME from NAMESPACE to VALUE."
-    `(set
-      (simple-indentation-namespace-from ,namespace ,var-name)
-      ,value))
-
+  "Setq var with VAR-NAME from NAMESPACE to VALUE."
+  `(set
+    (simple-indentation-namespace-from ,namespace ,var-name)
+    ,value))
 
 (defmacro simple-indentation-namespace-from (namespace something-name)
-    "Get something symbol with `SOMETHING-NAME` from `NAMESPACE`."
-    `(intern
-      ,(s-concat
-        (symbol-name namespace)
-        "-"
-        (symbol-name something-name))))
-
+  "Get something symbol with `SOMETHING-NAME` from `NAMESPACE`."
+  `(intern
+    ,(s-concat
+      (symbol-name namespace)
+      "-"
+      (symbol-name something-name))))
 
 (defun simple-indentation-namespace-for-symbols ;nofmt
     (namespace-symb something-name-symb)
-    "Get symbol with SOMETHING-NAME-SYMB from NAMESPACE-SYMB."
-    (intern
-     (s-concat
-      (symbol-name namespace-symb)
-      "-"
-      (symbol-name something-name-symb))))
+  "Get symbol with SOMETHING-NAME-SYMB from NAMESPACE-SYMB."
+  (intern
+   (s-concat
+    (symbol-name namespace-symb)
+    "-"
+    (symbol-name something-name-symb))))
 
 (provide 'simple-indentation-namespace)
 ;;; simple-indentation-namespace.el ends here
