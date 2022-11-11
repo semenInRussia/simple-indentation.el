@@ -56,11 +56,11 @@ Please, don't touch, this is change automatically.")
     (major-mode
      &optional namespace
      &key
-       rules
-       (one-indent simple-indentation-default-one-indent)
-       (copy-indention-of-previous-line t)
-       (clear-old-indention nil)
-       (clear-empty-lines t))
+     rules
+     (one-indent simple-indentation-default-one-indent)
+     (copy-indention-of-previous-line t)
+     (clear-old-indention nil)
+     (clear-empty-lines t))
   "Create all variables and functions for indent code in `MAJOR-MODE`.
 All vars and functions will save in NAMESPACE.  RULES is list of
 rules which you can create with `indention/make-rule`.
@@ -339,7 +339,7 @@ CLEAR-OLD-INDENTION, CLEAR-EMPTY-LINES see docs."
                                                   one-indent))
                (step (length oi)))
           (while (s-prefix-p oi (substring line cursor))
-            (incf cursor step))
+            (cl-incf cursor step))
           (/ cursor step)))
 
        (simple-indentation-namespace-defun
