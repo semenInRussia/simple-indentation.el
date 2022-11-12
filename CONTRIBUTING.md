@@ -1,8 +1,6 @@
 # Contributing
 
-Contributions are welcome. If you discover bugs or issues, or have ideas for
-improvements or new features, please file a report on the issue tracker for this
-repository. Follow the guidelines below to make sure everything goes smoothly.
+Contributions are welcome. If you discover bugs or issues, or have ideas for improvements or new features, please file a report on the issue tracker for this repository. Follow the guidelines below to make sure everything goes smoothly.
 
 ## Issue reporting
 
@@ -15,17 +13,20 @@ repository. Follow the guidelines below to make sure everything goes smoothly.
 
 - Perform all changes on a topic branch for easier merging
 - Follow the coding conventions already in use
-- Verify Emacs Lisp code with `checkdoc`
+- Verify Emacs Lisp code with `melpazoid`, it's available at the CI/CD tab
 - Add unit tests whenever possible
 - Open a [pull request](https://help.github.com/articles/using-pull-requests)
   relating to a single issue.
 
-## Coding Conventions
 
 ### Naming
 
 - Use a `simple-indentation-` prefix for all public names.
 - Use a `simple-indentation--` prefix for all internal names.
+- If you write a code at the module named `simple-indentation-hooks`,
+  then use a `simple-indentation-hooks-` for all public names and a
+  `simple-indentation-hooks--` prefix for all internal names.  For
+  each module this rule works also
 
 ### Docstrings
 
@@ -34,6 +35,8 @@ Write meaningful docstrings for all functions and vars.
 - Document all functions and variables as directed by `checkdoc`.
 - Consider using [Flycheck](https://github.com/flycheck/flycheck) to automate
   `checkdoc` while you're editing.
+- You can also check a result of the `melpazoid` when available at the
+  CI/CD tab at the Git repository page
 
 ### Common Lisp functions
 
