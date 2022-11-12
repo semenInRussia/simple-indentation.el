@@ -46,7 +46,11 @@
 
 (defcustom simple-indentation-rules-make-binary-keywords
   '(:or :and)
-  "Keywords of rule-make which has handler `simple-indentation-handler-:<word>'."
+  "Keywords for `rule-make'.
+
+For each keyword should be available function
+`simple-indentation-bin-handler-<word>'.  These functions should take rule and
+arguments after the keyword handling and return a modified rule"
   :group 'simple-indentation
   :type '(repeat symbol))
 
@@ -60,45 +64,52 @@
    (list
     (-const t)
     'simple-indentation-rules-not-found-keyword-handler))
-  "This is list of pairs from predicate or keyword and handlers.
-Predicate take keyword, rule, values and return t or nil, when nil then,
-handler will executing, handler take keyword and return modified,
-rule.  If instead of predicate passed keyword, then predicate is function which
-return true when keywords is equal.  This functions will call with rule
- and values, when call `simple-indentation-rules-make.'.  Default handler is
-`simple-indentation-rules-handler-<keyword>'."
+  "Pairs from predicate/keyword, handler for `simple-indentation-rules-make'.
+
+Predicate is a function taking the following arguments
+
+- keyword, handling keyword passed to `simple-indentation-rules-make'
+- rule, rule which was builded with previous keywords
+- values, values after a handling keyword
+
+Predicate should return non-nil, if handler should be executed.  If
+instead of predicate given a keyword, then predicate is function which
+compare a taking keyword with the given
+
+Handler is a function return a modified rule, it take same args as predicate"
   :group 'simple-indentation
   :type '(repeat '(predicate function)))
 
 (defun simple-indentation-rules-make (&rest args)
   "Create indention rule.
+
 INDENT-FUNC is function which call when PREDICATE returns
 non-nil value.  Possible ARGS:
-* :check-on-prev-line
+- :check-on-prev-line
 Before run PREDICATE, move to previous line.
-* :check-on-prev-text-line
+- :check-on-prev-text-line
 Before run PREDICATE, move to previous not empty line.
-* :check-on-prev-code-line
+- :check-on-prev-code-line
 Before run PREDICATE, move to previous no comment line.
-* :on-keywords <keywords>
+- :on-keywords <keywords>
 Call INDENT-FUNC When line has one of keywords.
 If keyword of keywords has space, then this keywords parsed as keyword 1 and
 keyword2 splitted (1+) spaces.
-* :on-keywords-in-code <keywords>
+- :on-keywords-in-code <keywords>
 Call INDENT-FUNC when line, ignoring comments and strings has one of keywords.
 If keyword of keywords has space, then this keywords parsed as keyword 1 and
 keyword2 splitted (1+) spaces.
-* :on-chars <chars>
+- :on-chars <chars>
 Call INDENT-FUNC When line has one of chars.
-* :on-chars-in-code <chars>
+- :on-chars-in-code <chars>
 Call INDENT-FUNC when line, ignoring comments and strings, has one of CHARS.
-* :and
+- :and
 Take predicate left of :and, set predicate to current predicate and left
-* :or
-Take predicate left of :or, set predicate to current predicate or left
-* :add-indent
-INDENT-FUNC utils add `one-indent' to current line.
-* :deindent
+- :or
+Take predicate left from :or, set predicate to current predicate or left
+- :add-indent
+INDENT-FUNC add `one-indent' to the current line.
+- :deindent
 INDENT-FUNC is deindent current line"
   (let* ((rule (simple-indentation-rules-empty))
          (right-args args)
@@ -121,97 +132,111 @@ INDENT-FUNC is deindent current line"
     rule))
 
 (defun simple-indentation-rules-keyword (keyword rule values right-args)
-  "Handle KEYWORD, then modify RULE with VALUES with RIGHT-ARGS.
-Return number of handled modified RULE and RIGHT-ARGS."
+  "Handle KEYWORD, after modify RULE with VALUES and RIGHT-ARGS.
+
+Return list from the modified RULE and number of handled arguments from
+RIGHT-ARGS"
   (let ((handle-funtion
          (simple-indentation-rules-get-handler-of keyword)))
     (funcall handle-funtion keyword rule values right-args)))
 
 (defun simple-indentation-rules-basic-keyword-p (keyword)
-  "Return t, when KEYWORD has basic handler."
+  "Return non-nil, when KEYWORD has a basic handler for the make rule func."
   (-contains-p simple-indentation-rules-make-basic-keywords keyword))
 
 (defun simple-indentation-rules-basic-handler (keyword rule values _right-args)
-  "Handle KEYWORD by basic handler with VALUES return modified RULE."
+  "Handle KEYWORD with basic handler pass to it VALUES, return a modified RULE."
   (let ((basic-handler
          (simple-indentation-rules-get-basic-handler-of keyword))
+        ;; mark all values beetween handling keyword and next keyword as handled
         (handled-args (length values)))
     (list (funcall basic-handler rule values) handled-args)))
 
 (defun simple-indentation-rules-get-basic-handler-of (keyword)
-  "Get basic handler of KEYWORD for `simple-indentation-rules-make'."
+  "Get a basic handler for KEYWORD for `simple-indentation-rules-make'."
   (intern
    (s-concat "simple-indentation-rules-handler-"
              (s-chop-prefix ":" (format "%s" keyword)))))
 
 (defun simple-indentation-rules-binary-keyword-p (keyword)
-  "Return t, when KEYWORD has binary handler."
+  "Return t, if KEYWORD has binary handler for `simple-indentation-rules-make'."
   (-contains-p simple-indentation-rules-make-binary-keywords keyword))
 
 (defun simple-indentation-rules-binary-handler (keyword rule _values right-args)
-  "Handle KEYWORD by binary handler with RIGHT-ARGS, return modified RULE."
+  "Handle KEYWORD with binary handler for `simple-indentation-rules-make' args.
+
+Pass to this handler RULE and RIGHT-ARGS.  Return modified RULE.  You can add
+handler by updating `simple-indentation-rules-make-binary-keywords' variable"
   (let ((handler
-         (simple-indentation-rules-get-binary-handler-of keyword)))
-    (list (funcall handler rule right-args) (length right-args))))
+         (simple-indentation-rules-get-binary-handler-of keyword))
+        ;; mark ALL values after handling keyword as handled
+        (handled-args-count (length right-args)))
+    (list (funcall handler rule right-args) handled-args-count)))
 
 (defun simple-indentation-rules-get-binary-handler-of (keyword)
-  "Get basic handler of KEYWORD for `simple-indentation-rules-make'."
+  "Get a basic handler of KEYWORD for `simple-indentation-rules-make'."
   (intern
    (s-concat "simple-indentation-rules-bin-handler-"
              (s-chop-prefix ":" (format "%s" keyword)))))
 
-(defun simple-indentation-rules-begin-block-handler (_keyword rule _values right-args)
+(defun simple-indentation-rules-begin-block-handler (_keyword ;nofmt
+                                                     rule
+                                                     _values
+                                                     right-args)
   "Handler of :begin keyword in `simple-indentation-rules-make'.
-Return RULE with number of handled RIGHT-ARGS."
-  (let* ((body nil)
-         pred)
-    (-if-let
-        (end-index (-elem-index :end right-args))
-        (progn
-          (setq body (-take end-index right-args))
-          (setq pred
-                (simple-indentation-rules-predicate
-                 (apply #'simple-indentation-rules-make body)))
-          (list
-           (simple-indentation-rules-set-predicate pred rule)
-           (1+ (length body))))
-      (progn
-        (simple-indentation-rules-report "Not found closing :end token!"
-                                         :begin right-args)
-        (list rule (length body))))))
+
+Return a list from the RULE and number of handled args from RIGHT-ARGS."
+  (-if-let*
+      ((end-index (-elem-index :end right-args))
+       (body (-take end-index right-args))
+       (body-rule (apply #'simple-indentation-rules-make body))
+       (pred (simple-indentation-rules-predicate body-rule))
+       (handled-args-number (1+ (length body))))
+      (list
+       (simple-indentation-rules-set-predicate pred rule)
+       handled-args-number)
+    (progn
+      (simple-indentation-rules-report "Not found closing :end token!"
+                                       :begin right-args)
+      (list rule (length right-args)))))
 
 (defun simple-indentation-rules-report (message keyword right-args)
   "Debug MESSAGE with active KEYWORD, debug RIGHT-ARGS for clarity."
-  (let (result)
-    (setq result
-          (s-lex-format
-           "
+  (let ((report-string
+         (s-lex-format
+          "
 (simple-indentation-rules-make
   ...
-  ${keyword}    ; ${message}"))
+  ${keyword}    ; ${message}")))
     (--each right-args
-      (setq result (s-concat result "\n" "  " (pp it))))
-    (setq result (s-concat result ")"))
-    (message "%s" result)))
+      (setq report-string (s-concat report-string "\n" "  " (pp it))))
+    (setq report-string (s-concat report-string ")"))
+    (display-warning 'simple-indentation report-string :error)))
 
-(defun simple-indentation-rules-not-found-keyword-handler (keyword rule _values right-args)
-  "Message that, handler for KEYWORD not found, and return RULE.
+(defun simple-indentation-rules-not-found-keyword-handler (keyword ;nofmt
+                                                           rule
+                                                           _values
+                                                           right-args)
+  "Message that handler for KEYWORD isn't found and return a modifed RULE.
+
 Debug VALUES and RIGHT-ARGS, passed to non exists handler."
-  (message
+  (display-warning
+   'simple-indentation
    (s-lex-format
-    "Handler of keyword `${keyword}` non exists, this is very bad!
-If you are has basic handler, just rename its to this template
+    "Handler of keyword `${keyword}' isn't exists.
+If you has a basic handler, just rename it to the following template
 `simple-indentation-rules-handler-${keyword}'
 
-If your handler need to special rules, see to
-`simple-indentation-rules-make-general-keywords-handlers'"))
+If your handler need to special rules, see
+`simple-indentation-rules-make-general-keywords-handlers'")
+   :error)
   (simple-indentation-rules-report "Here not found KEYWORD!"
                                    keyword
                                    right-args)
   (list rule (length right-args)))
 
 (defun simple-indentation-rules-get-handler-of (keyword)
-  "Get handler of KEYWORD for `simple-indentation-rules-make'."
+  "Get a handler for KEYWORD for `simple-indentation-rules-make' args parsing."
   (let ((handler
          (-second-item
           (--find
@@ -220,145 +245,247 @@ If your handler need to special rules, see to
     (lambda (keyword rule values right-args)
       (funcall handler keyword rule values right-args))))
 
-(defun simple-indentation-rules-special-handler-of-keyword-p (keyword pred-and-handler)
-  "Get t, when PRED-AND-HANDLER is special handler of KEYWORD.
-PRED-AND-HANDLER is list from predicate, which take keyword and return
-t when is suitable for keyword handler, and function which take rule and
-values and return new rule.  Instead of predicate, also able be keyword,
-when this keyword is equal other keyword, return t, by example with basic
-predicate."
+(defun simple-indentation-rules-special-handler-of-keyword-p (keyword ;nofmt
+                                                              pred-and-handler)
+  "Get t, if PRED-AND-HANDLER is suited to KEYWORD in the rule make function.
+
+PRED-AND-HANDLER is a item from the
+`simple-indentation-rules-make-general-keywords-handlers'."
   (let ((pred-or-keyword (-first-item pred-and-handler)))
     (when (keywordp pred-or-keyword)
       (setq pred-or-keyword (apply-partially #'eq pred-or-keyword)))
     (funcall pred-or-keyword keyword)))
 
 (defun simple-indentation-rules-empty ()
-  "Return indention rule by defaults."
+  "Return default empty indention rule."
   (list (-const nil) nil))
 
 (defun simple-indentation-rules-handler-predicate (rule values)
-  "Handler for `:on-chars' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:predicate' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:predicate <pred>
+
+Where <pred> is a function returning non-nil to indicate RULE execution.
+VALUES is list from the arguments of `simple-indentation-rules-make'
+after `:predicate' keyword"
   (let* ((pred (-first-item values)))
     (simple-indentation-rules-add-predicate pred rule)))
 
 (defun simple-indentation-rules-handler-indent-func (rule values)
-  "Handler for `:on-chars' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:indent-func' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:indent-func <func>
+
+Where <func> is a function changing a buffer, it will be called when a
+predicate of the RULE returns non-nil.  VALUES is list from the
+arguments of `simple-indentation-rules-make' after `:predicate'
+keyword"
   (let* ((indent-func (-first-item values)))
     (simple-indentation-rules-set-indent-func indent-func rule)))
 
 (defun simple-indentation-rules-handler-on-chars (rule values)
-  "Handler for `:on-chars' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:on-chars' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:on-chars <chars>
+
+Where <chars> is a string from chars if one of its placed at the current line,
+then predicate will return non-nil VALUES is list from the arguments
+of `simple-indentation-rules-make' after `:on-chars' keyword.  Return given RULE
+with new predicate"
   (let* ((chars (-first-item values))
          (new-predicate
           (simple-indentation-rules-make-line-has-chars-p chars)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
 
 (defun simple-indentation-rules-handler-on-chars-in-code (rule values)
-  "Handler for `:on-chars-in-code' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:on-chars-in-code' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:on-chars-in-code <chars>
+
+Where <chars> is a string from chars, if one of its placed at the
+current line (ignore commentaries), then predicate will return non-nil
+VALUES is list from the arguments of `simple-indentation-rules-make'
+after `:on-chars-in-code' keyword.  Return given RULE with new
+predicate"
   (let* ((chars (-first-item values))
          (new-predicate
-          (simple-indentation-rules-make-line-has-chars-in-code-p
-           chars)))
+          (simple-indentation-rules-make-line-has-chars-in-code-p chars)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
 
 (defun simple-indentation-rules-handler-on-keywords (rule keywords)
-  "Handler for `:on-keywords' in `simple-indentation-rules-make'.
-RULE is old rule, KEYWORDS is list of keywords"
+  "Handler of `:on-keywords' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:on-keywords <words>
+
+Where <words> is a list from words, if one of its placed at the
+current line, then predicate will return non-nil VALUES is list from
+the arguments of `simple-indentation-rules-make' after `:on-keywords'
+keyword.  Return given RULE with new predicate"
   (let ((new-predicate
          (simple-indentation-rules-make-line-has-keywords-p keywords)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
 
 (defun simple-indentation-rules-handler-on-keywords-in-code (rule keywords)
-  "Handler for `:on-keywords-in-code' in `simple-indentation-rules-make'.
-RULE is old rule, KEYWORDS is list of keywords"
+  "Handler of `:on-keywords-in-code' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:on-keywords-in-code <words>
+
+Where <words> is a list from words, if one of its placed at the
+current line (ignore commentaries), then predicate will return non-nil
+VALUES is list from the arguments of `simple-indentation-rules-make'
+after `:on-keywords-in-code' keyword.  Return given RULE with new
+predicate"
   (let ((new-predicate
          (simple-indentation-rules-make-line-has-keywords-in-code-p keywords)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
 
 (defun simple-indentation-rules-handler-check-on-prev-line (rule &rest _)
-  "Handler for `:check-on-prev-line' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:check-on-prev-line' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+... some predicates
+:check-on-prev-line
+
+Where ... some predicates is some keywords of `simple-indentation-rules-make'
+updating RULE predicate.  Using this keyword predicate will be called at the
+previous line"
   (simple-indentation-rules-apply-to-predicate
    'simple-indentation-utils-compose-with-prev-line rule))
 
 (defun simple-indentation-rules-handler-check-on-prev-text-line (rule &rest _)
-  "Handler for `:check-on-prev-text-line' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:check-on-prev-text-line' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+... some predicates
+:check-on-prev-text-line
+
+Where ... some predicates is some keywords of `simple-indentation-rules-make'
+updating RULE predicate.  Using this keyword predicate will be called at the
+previous text line (ignore blank lines)"
   (simple-indentation-rules-apply-to-predicate
    'simple-indentation-utils-compose-with-prev-text-line rule))
 
 (defun simple-indentation-rules-handler-check-on-prev-code-line (rule &rest _)
-  "Handler for `:check-on-prev-code-line' in `simple-indentation-rules-make'.
-RULE is old rule, VALUES is list, in which first item is string of chars.
-Return new rule."
+  "Handler of `:check-on-prev-code-line' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+... some predicates
+:check-on-prev-code-line
+
+Where ... some predicates is some keywords of `simple-indentation-rules-make'
+updating RULE predicate.  Using this keyword predicate will be called at the
+previous code line (ignore commentaries lines)"
   (simple-indentation-rules-apply-to-predicate
    'simple-indentation-utils-compose-with-prev-code-line rule))
 
 (defun simple-indentation-rules-handler-on-current-or-previous-line (rule ;nofmt
                                                                      &rest _)
-  "Handler of `:on-current-or-previous-line' in rules-make.
-Return new modified RULE."
+  "Handler of :on-current-or-previous-line for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+... some predicates
+:on-current-or-previous-line
+
+Where ... some predicates is some keywords of `simple-indentation-rules-make'
+updating RULE predicate.  Using this keyword predicate will be called at the
+previous line and at the current, the predicate will return non-nil if the
+one of both calls return non-nil"
   (simple-indentation-rules-set-predicate
-   (simple-indentation-rules-utils-or-run-func-before-indent-current-line-p
+   (simple-indentation-rules-predicate-with-possible-action-before
     rule 'simple-indentation-utils-previous-line)
    rule))
 
-(defun simple-indentation-rules-handler-on-current-or-previous-text-line (rule ;nofmt
-                                                                          &rest
-                                                                            _)
-  "Handler of `:on-current-or-previous-text-line' in `rules-make'.
-Return new modified RULE."
-  (simple-indentation-rules-set-predicate
-   (simple-indentation-rules-utils-or-run-func-before-indent-current-line-p
-    rule 'simple-indentation-utils-previous-text-line)
-   rule))
-
-(defun simple-indentation-rules-handler-on-current-or-previous-code-line (rule
-                                                                          ;;nofmt
-                                                                          &rest
-                                                                            _)
-  "Handler of `:on-current-or-previous-code-line' in `rules-make'.
-Return new modified RULE."
-  (simple-indentation-rules-set-predicate
-   (simple-indentation-rules-utils-or-run-func-before-indent-current-line-p
-    rule 'simple-indentation-utils-previous-code-line)
-   rule))
-
-(defun simple-indentation-rules-utils-or-run-func-before-indent-current-line-p (rule func)
-  "Get func getting result of `indent-current-line-p' or run before FUNC.
-Result of `indent-current-line-p' is computed on RULE."
-  (lambda ()
-    (or
-     (simple-indentation-rules-indent-current-line-p rule)
-     (progn
-       (funcall func)
-       (simple-indentation-rules-indent-current-line-p rule)))))
-
 (defun simple-indentation-rules-handler-add-indent (rule &rest _)
-  "Handler for `:add-indent' in `simple-indentation-rules-make'.
-Return new modified RULE."
+  "Handler of `:add-indent' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:add-indent
+
+Using this keyword, the indent function of RULE will be setted to value of
+`simple-indentation-increment-indent-level-function'.  Return a rule with new
+indent function"
   (simple-indentation-rules-set-indent-func
-   'simple-indentation-increment-indent-level rule))
+   'simple-indentation-increment-indent-level
+   rule))
 
 (defun simple-indentation-rules-handler-deindent (rule &rest _)
-  "Handler for `:add-indent' in `simple-indentation-rules-make'.
-Return new modified RULE."
+  "Handler of `:deindent' for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:deindent
+
+Using this keyword, the indent function of RULE will be setted to value of
+`simple-indentation-decrement-indent-level-function'.  Return a rule with new
+indent function"
   (simple-indentation-rules-set-indent-func
    'simple-indentation-decrement-indent-level rule))
 
+(defun simple-indentation-rules-handler-on-current-or-previous-code-line (rule
+                                                                          ;;nofm
+                                                                          &rest
+                                                                          _)
+  "Handler of `:on-current-or-previous-code-line' in `rules-make'.
+Return new modified RULE."
+  (simple-indentation-rules-set-predicate
+   (simple-indentation-rules-predicate-with-possible-action-before
+    rule 'simple-indentation-utils-previous-code-line)
+   rule))
+
+(defun simple-indentation-rules-handler-on-current-or-previous-text-line (rule
+                                                                          ;;nofm
+                                                                          &rest
+                                                                          _)
+  "Handler of :on-current-or-previous-text-line for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+... some predicates
+:on-current-or-previous-text-line
+
+Where ... some predicates is some keywords of `simple-indentation-rules-make'
+updating RULE predicate.  Using this keyword predicate will be called at the
+previous code line (ignore blank) and at the current, the predicate
+will return non-nil if the one of both calls return non-nil"
+  (simple-indentation-rules-set-predicate
+   (simple-indentation-rules-predicate-with-possible-action-before
+    rule 'simple-indentation-utils-previous-text-line)
+   rule))
+
 (defun simple-indentation-rules-bin-handler-or (rule right-args)
-  "Binary handler for `:or' for make rules.
-Return new modified RULE.  Use RIGHT-ARGS for create second rule."
+  "Binary handler of the `:or' keyword for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+...predicate1
+:or
+...predicate2
+
+Where ...predicate1 and ...predicate2 are lines with keywords changing
+predicate of a RULE (sush as `:predicate')
+
+Using this keyword predicate predicate of a RULE will be setted to function
+returning result of predicate1 or result of predicate2.  Return a modified RULE
+with new predicate
+
+RIGHT-ARGS is args after the `:or' keyword"
   (let* ((other-rule
           (apply #'simple-indentation-rules-make right-args))
          (pred
@@ -369,8 +496,22 @@ Return new modified RULE.  Use RIGHT-ARGS for create second rule."
     (simple-indentation-rules-set-predicate pred rule)))
 
 (defun simple-indentation-rules-bin-handler-and (rule right-args)
-  "Binary handler for `:and' for make rules.
-Return new modified RULE.  Use RIGHT-ARGS for create second rule."
+  "Binary handler of the `:and' keyword for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+...predicate1
+:and
+...predicate2
+
+Where ...predicate1 and ...predicate2 are lines with keywords changing
+predicate of a RULE (sush as `:predicate')
+
+Using this keyword predicate predicate of a RULE will be setted to function
+returning result of predicate1 logic and result of predicate2.  Return
+a modified RULE with new predicate
+
+RIGHT-ARGS is args after the `:and' keyword"
   (let* ((other-rule
           (apply #'simple-indentation-rules-make right-args))
          (pred
@@ -380,63 +521,78 @@ Return new modified RULE.  Use RIGHT-ARGS for create second rule."
              (simple-indentation-rules-indent-current-line-p rule)))))
     (simple-indentation-rules-set-predicate pred rule)))
 
+(defun simple-indentation-rules-predicate-with-possible-action-before (rule
+                                                                       ;; nofmt
+                                                                       func)
+  "Get a function, returning RULE predicate's result or a RULE predicate result with FUNC call before."
+  ;; sorry all to this long message
+  (lambda ()
+    (or
+     (simple-indentation-rules-indent-current-line-p rule)
+     (progn
+       (funcall func)
+       (simple-indentation-rules-indent-current-line-p rule)))))
+
 (defun simple-indentation-rules-make-line-has-keywords-p (keywords)
-  "Make func, which if line has one of KEYWORDS, return t."
+  "Make function, return non-nil if line has one of KEYWORDS."
   (declare (pure t) (side-effect-free t))
   (lambda ()
     (simple-indentation-utils-line-has-keywords-p keywords)))
 
 (defun simple-indentation-rules-make-line-has-keywords-in-code-p (keywords)
-  "Make func, which if line has one of KEYWORDS, return t."
+  "Make function, return non-nil if code line has one of KEYWORDS."
   (declare (pure t) (side-effect-free t))
   (lambda ()
     (simple-indentation-utils-code-line-has-keywords keywords)))
 
 (defun simple-indentation-rules-make-line-has-chars-p (chars)
-  "Make func, which if line has one of CHARS, return t."
+  "Make function, return non-nil if line has one of CHARS."
   (declare (pure t) (side-effect-free t))
   (lambda () (simple-indentation-rules-line-has-chars-p chars)))
 
 (defun simple-indentation-rules-make-line-has-chars-in-code-p (chars)
-  "Make func, which get t, when code part of line has one of CHARS."
+  "Make function, return non-nil if code line has one of CHARS."
   (declare (pure t) (side-effect-free t))
   (lambda () (simple-indentation-utils-code-line-has-chars-p chars)))
 
 (defun simple-indentation-rules-line-has-chars-p (chars)
-  "If S, has one of CHARS, return t."
+  "If content of the current line has one of CHARS, return non-nil."
   (let ((line (simple-indentation-utils-current-line)))
     (--any
      (s-contains-p (char-to-string it) line)
      (string-to-list chars))))
 
 (defun simple-indentation-rules-predicate (rule)
-  "Get predicate of indention RULE."
+  "Get predicate of `simple-indentation' RULE."
   (-second-item rule))
 
 (defun simple-indentation-rules-indent-current-line-p (rule)
-  "Check this RULE must indent current line."
+  "Check that RULE want to indent current line."
   (-when-let
       (pred (simple-indentation-rules-predicate rule))
-    (save-excursion (funcall pred))))
+    (simple-indentation-rules-pred-indent-current-line-p pred)))
 
-(defun simple-indentation-rules-indent-current-line-with-func-p (func)
-  "Check this FUNC must indent current line."
-  (save-excursion (funcall func)))
+(defun simple-indentation-rules-pred-indent-current-line-p (pred)
+  "Return non-nil, when a predicate PRED want to indent current line."
+  (save-excursion (funcall pred)))
 
 (defun simple-indentation-rules-set-indent-func (new-indent-func rule)
-  "Set indent function of RULE to NEW-INDENT-FUNC."
+  "Replace indent function of RULE with NEW-INDENT-FUNC."
   (-replace-at 0 new-indent-func rule))
 
 (defun simple-indentation-rules-call-indent-function (rule)
-  "Call function for indent current line of `RULE`."
+  "Call indent function of RULE."
   (save-excursion (beginning-of-line) (funcall (-first-item rule))))
 
 (defun simple-indentation-rules-set-predicate (new-predicate rule)
-  "Set predicate of RULE to NEW-PREDICATE."
+  "Replace a predicate of RULE with NEW-PREDICATE."
   (-replace-at 1 new-predicate rule))
 
-(defun simple-indentation-rules-add-predicate (new-predicate rule &optional compose-function)
-  "Add predicate NEW-PREDICATE to RULE use for this COMPOSE-FUNCTION.
+(defun simple-indentation-rules-add-predicate (new-predicate rule ;nofmt
+                                                             &optional ;nofmt
+                                                             compose-function)
+  "Add a predicate NEW-PREDICATE to RULE, use for this COMPOSE-FUNCTION.
+
 COMPOSE-FUNCTION take two nil/t values, and return new nil/t value.
 COMPOSE-FUNCTION defaults to `or'."
   (setq compose-function
@@ -447,7 +603,7 @@ COMPOSE-FUNCTION defaults to `or'."
             (lambda ()
               (funcall
                compose-function
-               (simple-indentation-rules-indent-current-line-with-func-p
+               (simple-indentation-rules-pred-indent-current-line-p
                 new-predicate)
                (simple-indentation-rules-indent-current-line-p rule)))))
     (simple-indentation-rules-set-predicate final-pred rule)))
@@ -460,11 +616,12 @@ COMPOSE-FUNCTION defaults to `or'."
 
 (cl-defun simple-indentation-rules-indent-line-with-sorted-rules (sorted-rules
                                                                   &key
-                                                                    (each-line-before-indent-hook nil)
-                                                                    (each-line-after-indent-hook nil))
+                                                                  (each-line-before-indent-hook nil)
+                                                                  (each-line-after-indent-hook nil))
   "Indent or don't indent current line depending on SORTED-RULES.
-Before each indent of line call EACH-LINE-BEFORE-INDENT-HOOK, after
-EACH-LINE-AFTER-INDENT-HOOK"
+
+Before each line indenting call hooks EACH-LINE-BEFORE-INDENT-HOOK, after
+call EACH-LINE-AFTER-INDENT-HOOK"
   (run-hooks each-line-before-indent-hook)
   (-when-let
       (rule
