@@ -45,7 +45,7 @@
   :type '(repeat symbol))
 
 (defcustom simple-indentation-rules-make-binary-keywords
-  '(:or :and)
+  '(:or :and :not)
   "Keywords for `rule-make'.
 
 For each keyword should be available function
@@ -520,6 +520,26 @@ RIGHT-ARGS is args after the `:and' keyword"
              (simple-indentation-rules-indent-current-line-p other-rule)
              (simple-indentation-rules-indent-current-line-p rule)))))
     (simple-indentation-rules-set-predicate pred rule)))
+
+(defun simple-indentation-rules-bin-handler-not (rule right-args)
+  "Binary handler of the `:not' keyword for `simple-indentation-rules-make'.
+
+In `simple-indentation-rules-make' should be used by following way
+
+:not
+...predicates
+
+Where ...predicates is lines with keywords changing
+predicate of a RULE (sush as `:predicate')
+
+Using this keyword predicate predicate of a RULE will be setted to function
+returning result logical not of result of predicate builded with the keywords
+after `:not'"
+  (let* ((other-rule
+          (apply #'simple-indentation-rules-make right-args))
+         (other-pred
+          (-not (simple-indentation-rules-predicate other-rule))))
+    (simple-indentation-rules-set-predicate other-pred rule)))
 
 (defun simple-indentation-rules-predicate-with-possible-action-before (rule
                                                                        ;; nofmt

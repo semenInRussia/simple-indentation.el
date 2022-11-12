@@ -321,6 +321,39 @@
       (should-not
        (simple-indentation-rules-indent-current-line-p rule)))))
 
+(ert-deftest simple-indentation-rules-test-not
+    ()
+  (let ((rule (simple-indentation-rules-make :not :on-chars "!")))
+    (with-temp-buffer                   ;nofmt
+      (insert "Line without indent!")
+      (should-not
+       (simple-indentation-rules-indent-current-line-p rule))
+      (newline)
+      (insert "Line with indent (no exclamation point)")
+      (should (simple-indentation-rules-indent-current-line-p rule)))))
+
+(ert-deftest simple-indentation-rules-test-not-more-complex
+    ()
+  (let ((rule
+         (simple-indentation-rules-make
+          :on-chars "."
+          :and :not :on-chars "!")))
+    (with-temp-buffer                   ;nofmt
+      (insert "Line without indent!")
+      (should-not
+       (simple-indentation-rules-indent-current-line-p rule))
+      (newline)
+      (insert "Line also without indent because hasn't dot")
+      (should-not
+       (simple-indentation-rules-indent-current-line-p rule))
+      (newline)
+      (insert "Line without indent too.  because has !")
+      (should-not
+       (simple-indentation-rules-indent-current-line-p rule))
+      (newline)
+      (insert "Line with indent...")
+      (should (simple-indentation-rules-indent-current-line-p rule)))))
+
 (ert-deftest simple-indentation-rules-test-or-with-change-excusion
     ()
   (let ((rule
