@@ -235,15 +235,29 @@
     (simple-indentation-utils-duplicate-indention-of-prev-line)
     (should (equal (thing-at-point 'line t) "    "))))
 
-(ert-deftest simple-indentation-utils-code-line-has-chars-p
+(ert-deftest simple-indentation-utils-code-line-has-chars-p-in-comments
     ()
   (with-temp-buffer
     (insert "I am coder ()")
     (should (simple-indentation-utils-code-line-has-chars-p "(|"))
     (emacs-lisp-mode)
-    (beginning-of-line)
+    (end-of-line)
     (insert ";")
-    (should-not (simple-indentation-utils-code-line-has-chars-p "("))))
+    (insert "{}")
+    (should-not
+     (simple-indentation-utils-code-line-has-chars-p "{}"))))
+
+(ert-deftest simple-indentation-utils-code-line-has-chars-p-in-string
+    ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "I am coder ()")
+    (should (simple-indentation-utils-code-line-has-chars-p "(|"))
+    (beginning-of-line)
+    (insert "\"")
+    (insert "\"")
+    (should-not
+     (simple-indentation-utils-code-line-has-chars-p "(|"))))
 
 (ert-deftest simple-indentation-utils-line-has-keywords
     ()
@@ -259,6 +273,21 @@
     (insert "I am begin")
     (should-not
      (simple-indentation-utils-line-has-keywords-p '("end" "final")))))
+
+(ert-deftest simple-indentation-utils-code-p
+    ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "Code")
+    (should (and "Code" (simple-indentation-utils-code-p)))
+    (newline)
+    (insert "\"String\"")
+    (forward-char -1)
+    (should-not (and "String" (simple-indentation-utils-code-p)))
+    (newline)
+    (insert ";")
+    (insert "Comment")
+    (should-not (and "Comment" (simple-indentation-utils-code-p)))))
 
 (ert-deftest simple-indentation-utils-line-has-keywords-start
     ()
