@@ -330,7 +330,10 @@ In `simple-indentation-rules-make' should be used by following way
 Where <words> is a list from words, if one of its placed at the
 current line, then predicate will return non-nil VALUES is list from
 the arguments of `simple-indentation-rules-make' after `:on-keywords'
-keyword.  Return given RULE with new predicate"
+keyword.  Return given RULE with new predicate.
+
+KEYWORDS is a list from the arguments of `simple-indentation-rules-make' for
+`:on-keywords', each of it is a keyword"
   (let ((new-predicate
          (simple-indentation-rules-make-line-has-keywords-p keywords)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
@@ -346,7 +349,8 @@ Where <words> is a list from words, if one of its placed at the
 current line (ignore commentaries), then predicate will return non-nil
 VALUES is list from the arguments of `simple-indentation-rules-make'
 after `:on-keywords-in-code' keyword.  Return given RULE with new
-predicate"
+predicate.  If you call this function literally you can pass value of <words>
+with argument KEYWORDS."
   (let ((new-predicate
          (simple-indentation-rules-make-line-has-keywords-in-code-p keywords)))
     (simple-indentation-rules-add-predicate new-predicate rule)))
@@ -453,7 +457,7 @@ Return new modified RULE."
                                                                           ;;nofm
                                                                           &rest
                                                                           _)
-  "Handler of :on-current-or-previous-text-line for `simple-indentation-rules-make'.
+  "Simple-indentation-rules-make handler of :on-current-or-previous-text-line.
 
 In `simple-indentation-rules-make' should be used by following way
 
@@ -534,7 +538,11 @@ predicate of a RULE (sush as `:predicate')
 
 Using this keyword predicate predicate of a RULE will be setted to function
 returning result logical not of result of predicate builded with the keywords
-after `:not'"
+after `:not'
+
+Here RIGHT-ARGS is a list from the values which passed to
+the `run-command-rules-make'.  This handler make from RIGHT-ARGS new rule and
+change its predicate to negative."
   (let* ((other-rule
           (apply #'simple-indentation-rules-make right-args))
          (other-pred
@@ -542,7 +550,7 @@ after `:not'"
     (simple-indentation-rules-set-predicate other-pred rule)))
 
 (defun simple-indentation-rules-predicate-with-possible-action-before (rule
-                                                                       ;; nofmt
+                                                                       ;;nofmt
                                                                        func)
   "Get a function, returning RULE predicate's result or a RULE predicate result with FUNC call before."
   ;; sorry all to this long message

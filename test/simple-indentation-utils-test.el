@@ -115,7 +115,7 @@
   (with-temp-buffer
     (emacs-lisp-mode)
     (insert "Line 1")
-    (should (not (simple-indentation-utils-previous-code-line)))))
+    (should-not (simple-indentation-utils-previous-code-line))))
 
 (ert-deftest simple-indentation-utils-test-empty-current-line-p
     ()

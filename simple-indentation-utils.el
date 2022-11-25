@@ -60,17 +60,14 @@ If impossible go to previous line, then return nil."
 
 Return non-nil, when successively."
   (interactive)
-  (let ((starting-point (point)))
-    (simple-indentation-utils-previous-text-line)
-    (beginning-of-line)
-    (while (and (not (bobp)) (simple-indentation-utils-comment-line-p))
-      (simple-indentation-utils-previous-text-line)
-      (beginning-of-line))
-    ;; if the cursor placed at the beginning of the buffer, then
-    ;; go to the starting point and return nil
-    (or
-     (not (bobp))
-     (progn (goto-char starting-point) nil))))
+  (let ((starting-point (point))
+        traveled-lines stop)
+    (cl-block nil
+      (while t
+        (unless (simple-indentation-utils-previous-text-line)
+          (cl-return nil))
+        (unless (simple-indentation-utils-comment-line-p)
+          (cl-return t))))))
 
 (defun simple-indentation-utils-regexp-in-string-start (regexp)
   "Make REGEXP, whcih match on REGEXP only in start of string."
