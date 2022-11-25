@@ -54,17 +54,22 @@ If impossible go to previous line, then return nil."
   (setq n (or n 1))
   (eq 0 (forward-line (- n))))
 
-(defun simple-indentation-utils-previous-code-line (&optional n)
-  "Move on previous no comment line N times.
-Return t, when successively."
+(defun simple-indentation-utils-previous-code-line ()
+  "Go to the previous no comment line.
+
+Return non-nil, when successively."
   (interactive)
-  (setq n (or n 1))
-  (let ((ok t))
-    (setq ok (simple-indentation-utils-previous-text-line))
-    (while (and ok
-                (not (simple-indentation-utils-code-p (point-at-eol))))
-      (setq ok (simple-indentation-utils-previous-text-line)))
-    ok))
+  (let ((starting-point (point)))
+    (simple-indentation-utils-previous-text-line)
+    (beginning-of-line)
+    (while (and (not (bobp)) (simple-indentation-utils-comment-line-p))
+      (simple-indentation-utils-previous-text-line)
+      (beginning-of-line))
+    ;; if the cursor placed at the beginning of the buffer, then
+    ;; go to the starting point and return nil
+    (or
+     (not (bobp))
+     (progn (goto-char starting-point) nil))))
 
 (defun simple-indentation-utils-regexp-in-string-start (regexp)
   "Make REGEXP, whcih match on REGEXP only in start of string."
@@ -161,6 +166,10 @@ BOUND."
   "Return t, when context at POINT isn't in comment or string."
   (setq point (or point (point)))
   (not (syntax-ppss-context (syntax-ppss (point)))))
+
+(defun simple-indentation-utils-comment-line-p ()
+  "Return t, when current line isn't a comment line."
+  (comment-only-p (point-at-bol) (point-at-eol)))
 
 (defun simple-indentation-utils-code-line-has-chars-p (chars)
   "Return t, if current line, ignoring strings and comments has one of CHARS."

@@ -83,6 +83,8 @@
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
+    (insert ";; Comment")
+    (newline)
     (insert "Line 1")
     (newline)
     (insert ";; Ignore me")
@@ -90,7 +92,11 @@
     (insert ";; Ignore me alse")
     (newline)
     (should (simple-indentation-utils-previous-code-line))
-    (should (equal (thing-at-point 'line t) "Line 1\n"))))
+    (should
+     (equal
+      (buffer-substring-no-properties (point-at-bol) (point-at-eol))
+      "Line 1"))
+    (should-not (simple-indentation-utils-previous-code-line))))
 
 (ert-deftest simple-indentation-utils-test-previous-code-line-ignore-empty
     ()
