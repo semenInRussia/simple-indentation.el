@@ -255,6 +255,7 @@
     (should (simple-indentation-utils-code-line-has-chars-p "(|"))
     (beginning-of-line)
     (insert "\"")
+    (end-of-line)
     (insert "\"")
     (should-not
      (simple-indentation-utils-code-line-has-chars-p "(|"))))
@@ -289,15 +290,17 @@
     (insert "Comment")
     (should-not (and "Comment" (simple-indentation-utils-code-p)))))
 
-(ert-deftest simple-indentation-utils-line-has-keywords-start
+(ert-deftest simple-indentation-utils-line-comment-p
     ()
   (with-temp-buffer
-    (insert "end final was ignored")
-    (beginning-of-line)
-    (should
-     (not (simple-indentation-utils-line-has-keywords-p
-           '("end" "final")
-           10)))))
+    (emacs-lisp-mode)
+    (insert ";; djeidjeijdejdijedijedije")
+    (should-not (simple-indentation-utils-code-p))
+    (newline)
+    (insert "    ;; this line is not started with comment prefix")
+    (should-not (simple-indentation-utils-code-p))
+    (newline)
+    (should (simple-indentation-utils-code-p))))
 
 (ert-deftest simple-indentation-utils-code-line-has-keywords
     ()
@@ -307,6 +310,33 @@
      (simple-indentation-utils-code-line-has-keywords
       '("end" "final")))
     (emacs-lisp-mode)
+    (beginning-of-line)
+    (insert ";")
+    (should-not
+     (simple-indentation-utils-code-line-has-keywords
+      '("end" "final")))))
+
+(ert-deftest simple-indentation-utils-line-has-keywords
+    ()
+  (with-temp-buffer
+    (insert "I am eating")
+    (should
+     (simple-indentation-utils-line-has-keywords-p
+      '("eating" "drinking")))
+    (newline)
+    (insert "I am eatingnextword")
+    (should-not
+     (simple-indentation-utils-line-has-keywords-p
+      '("eating" "drinking")))))
+
+(ert-deftest simple-indentation-utils-code-line-has-keywords
+    ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "I am end")
+    (should
+     (simple-indentation-utils-code-line-has-keywords
+      '("end" "final")))
     (beginning-of-line)
     (insert ";")
     (should-not

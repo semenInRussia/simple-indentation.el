@@ -158,97 +158,73 @@ BOUND."
   (buffer-substring (line-beginning-position) (line-end-position)))
 
 (defun simple-indentation-utils-code-p (&optional point)
-  "Return t, when POINT isn't in comment or string."
+  "Return t, when context at POINT isn't in comment or string."
   (setq point (or point (point)))
   (not (syntax-ppss-context (syntax-ppss (point)))))
 
 (defun simple-indentation-utils-code-line-has-chars-p (chars)
   "Return t, if current line, ignoring strings and comments has one of CHARS."
   (--any
-   (simple-indentation-utils-code-line-has-one-char
+   (simple-indentation-utils-code-line-has-one-char-p
     (char-to-string it))
    (string-to-list chars)))
 
-(defun simple-indentation-utils-code-line-has-one-char (char)
+(defun simple-indentation-utils-code-line-has-one-char-p (char)
   "Return t, if current line, ignoring strings and comments has CHAR."
   (let ((end (point-at-eol))
-        (found nil))
+        found)
     (save-excursion
       (beginning-of-line)
-      (while (-when-let
-                 (next-char
-                  (simple-indentation-utils-point-at-forward-match
-                   char end))
-               (setq found (simple-indentation-utils-code-p next-char))
-               (not found)))
+      (while (and (search-forward char end t) (not found))
+        (setq found (simple-indentation-utils-code-p)))
       found)))
 
-(defun simple-indentation-utils-line-has-keywords-p (keywords &optional start)
-  "If current string, has one of KEYWORDS, return t.
-If keyword of keywords has space, then this keywords parsed as keyword 1 and
-keyword2 splitted (1+) spaces.  If start non-nil then before check keywords
-go to START point."
+(defun simple-indentation-utils-line-has-keywords-p (keywords)
+  "If current line consist one of KEYWORDS, return non-nil.
+
+\"Current line consist keyword\" mean that line at the cursor consist keyword
+with delimeters around"
   (--any
-   (simple-indentation-utils-line-has-this-keyword-p it start)
+   (simple-indentation-utils-line-has-this-keyword-p it)
    keywords))
 
-(defun simple-indentation-utils-line-has-this-keyword-p (keyword &optional start)
-  "If current line has KEYWORD, then return point to this, otherwise get nil.
-If keyword has space(s), then this is parse as some words separated (1+)
-spaces.  If start non-nil then before check keywords go to START point."
-  (setq start (or start 0))
-  (let ((keyword-regexp
-         (->> keyword
-              (s-split-words)
-              (simple-indentation-utils-regexp-words-separated-spaces)
-              (simple-indentation-utils-spaces-around-regexp))))
-    (save-excursion
-      (beginning-of-line)
-      (forward-char start)
-      (simple-indentation-utils-point-at-forward-regexp keyword-regexp))))
+(defun simple-indentation-utils-line-has-this-keyword-p (keyword)
+  "If current line consists KEYWORD, then return point at it, otherwise nil.
 
-(defun simple-indentation-utils-regexp-words-separated-spaces (words)
-  "Get regexp, which match all WORDS separated spaces."
-  (s-join " +" words))
+\"Line consists KEYWORDS\" mean that KEYWORD with delimeters symbols around
+placed at the current line."
+  (save-excursion
+    (beginning-of-line)
+    (simple-indentation-utils-forward-word keyword (point-at-eol))))
 
-(defun simple-indentation-utils-spaces-around-regexp (regexp)
-  "Add spaces around REGEXP."
-  (s-concat "^" regexp "$"
-            "\\|"
-            "^" regexp " "
-            "\\|"
-            " " regexp "$"
-            "\\|"
-            " " regexp " "))
+(defun simple-indentation-utils-forward-word (word &optional bound)
+  "Go to the next matched WORD.
+
+Matched word mean the literal string WORD with space symbols around (space
+symbols is special for each major-mode).  Bound the word search with point
+BOUND.
+
+If the WORD is not found, then return nil, otherwise return non-nil."
+  (->
+   (rx word-start (literal word) word-end)
+   (search-forward-regexp bound t nil)))
 
 (defun simple-indentation-utils-code-line-has-keywords (keywords)
-  "Get t, if current line, ignoring strings and comments has one of KEYWORDS."
+  "Get t, if current line ignoring strings and comments has one of KEYWORDS."
   (--any
-   (simple-indentation-utils-code-line-has-one-keyword it)
+   (simple-indentation-utils-code-line-has-one-keyword-p it)
    keywords))
 
-(defun simple-indentation-utils-code-line-has-one-keyword (keyword)
-  "Get t, when in current line ignoring comments and string has KEYWORD.
-Spaces in keywords will converted to (1+) spaces.  For example:
-
-    \"else if\" will match with:
-           \"else if\"
-           \"else      if\"
-           \"else   if\"
-
-KEYWORD is regexp, you must be care with special regexp symbols (.*$^[])."
+(defun simple-indentation-utils-code-line-has-one-keyword-p (keyword)
+  "Return non-nil, current line ignoring comments and string consists KEYWORD."
   (save-excursion
-    (let ((found nil)
-          (offset 0)
-          (begin (point-at-bol)))
-      (while (-when-let
-                 (next-keyword
-                  (simple-indentation-utils-line-has-this-keyword-p
-                   keyword offset))
-               (setq found
-                     (simple-indentation-utils-code-p next-keyword))
-               (setq offset (- next-keyword begin))
-               (not found)))
+    (let ((end (point-at-eol))
+          found)
+      (beginning-of-line)
+      (while (and
+              (simple-indentation-utils-forward-word keyword end)
+              (not found))
+        (setq found (simple-indentation-utils-code-p)))
       found)))
 
 (defun simple-indentation-utils-compose (&rest funs)
