@@ -108,9 +108,14 @@ Take predicate left of :and, set predicate to current predicate and left
 - :or
 Take predicate left from :or, set predicate to current predicate or left
 - :add-indent
-INDENT-FUNC add `one-indent' to the current line.
+Change INDENT-FUNC to function adding `one-indent' to the current line.
+This function must be saved within the
+`simple-indentation-increment-indent-level-function' variable
 - :deindent
-INDENT-FUNC is deindent current line"
+Change INDENT-FUNC to function deindenting current line.
+
+This function must be saved within the
+`simple-indentation-decrement-indent-level-function' variable"
   (let* ((rule (simple-indentation-rules-empty))
          (right-args args)
          keyword
@@ -642,6 +647,15 @@ COMPOSE-FUNCTION defaults to `or'."
          (new-pred (funcall f old-pred)))
     (simple-indentation-rules-set-predicate new-pred rule)))
 
+(defun simple-indentation-rules-do (rule)
+  "If RULE should be called, do it and return non-nil, otherwise return nil.
+
+\"RULE should be called\" mean that the indent function of the RULE should be
+called, RULE should be called when its predicate return non-nil"
+  (and
+   (simple-indentation-rules-indent-current-line-p rule)
+   (simple-indentation-rules-call-indent-function rule)))
+
 (cl-defun simple-indentation-rules-indent-line-with-sorted-rules (sorted-rules
                                                                   &key
                                                                   (each-line-before-indent-hook nil)
@@ -651,13 +665,22 @@ COMPOSE-FUNCTION defaults to `or'."
 Before each line indenting call hooks EACH-LINE-BEFORE-INDENT-HOOK, after
 call EACH-LINE-AFTER-INDENT-HOOK"
   (run-hooks each-line-before-indent-hook)
-  (-when-let
-      (rule
-       (--find
-        (simple-indentation-rules-indent-current-line-p it)
-        sorted-rules))
-    (simple-indentation-rules-call-indent-function rule))
+  (-find 'simple-indentation-rules-do sorted-rules)
   (run-hooks each-line-after-indent-hook))
+
+(defun simple-indentation-rules-union (&rest rules)
+  "Return a union rule of the all given RULES.
+
+Return the rule which will be called when one of the rules' predicates return
+non-nil, if a predicate is found, then call respective indent function."
+  (simple-indentation-rules-make
+   :predicate (->>
+               rules
+               (-map 'simple-indentation-rules-predicate)
+               (apply '-orfn))
+   :indent-func (lambda
+                  ()
+                  (simple-indentation-rules-indent-line-with-sorted-rules rules))))
 
 (provide 'simple-indentation-rules)
 ;;; simple-indentation-rules.el ends here

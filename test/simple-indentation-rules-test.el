@@ -121,14 +121,13 @@
       (should-not
        (simple-indentation-rules-indent-current-line-p rule)))))
 
-(ert-deftest simple-indentation-rules-test-on-keywords-without-spaces
+(ert-deftest simple-indentation-rules-test-on-keywords-separated-with-slash
     ()
   (let ((rule
          (simple-indentation-rules-make :on-keywords "lisp" "rust")))
     (with-temp-buffer
       (insert "I am not lisp/rust coder")
-      (should-not
-       (simple-indentation-rules-indent-current-line-p rule)))))
+      (should (simple-indentation-rules-indent-current-line-p rule)))))
 
 (ert-deftest simple-indentation-rules-test-on-keywords-single-keyword
     ()
@@ -136,24 +135,6 @@
     (with-temp-buffer
       (insert "word")
       (should (simple-indentation-rules-indent-current-line-p rule)))))
-
-(ert-deftest simple-indentation-rules-test-on-keywords-multi-keyword
-    ()
-  (let ((rule
-         (simple-indentation-rules-make :on-keywords "super man")))
-    (with-temp-buffer
-      (insert "super man")
-      (should (simple-indentation-rules-indent-current-line-p rule))
-      (newline)
-      (insert "super    man")
-      (should (simple-indentation-rules-indent-current-line-p rule))
-      (newline)
-      (insert "super   man")
-      (should (simple-indentation-rules-indent-current-line-p rule))
-      (newline)
-      (insert "superman")
-      (should-not
-       (simple-indentation-rules-indent-current-line-p rule)))))
 
 (ert-deftest simple-indentation-rules-test-on-keywords-in-code
     ()
@@ -442,5 +423,45 @@
        (simple-indentation-rules-indent-current-line-p rule))
       (insert "and rust")
       (should (simple-indentation-rules-indent-current-line-p rule)))))
+
+(ert-deftest simple-indentation-rules-test-union
+    ()
+  (let* ((simple-indentation-increment-indent-level-function
+          (lambda () (insert "  ")))
+         (simple-indentation-decrement-indent-level-function
+          (lambda () (delete-char 2)))
+         (rule-1
+          (simple-indentation-rules-make :add-indent
+                                         (lambda () (insert "  "))
+                                         :on-chars "["))
+         (rule-2
+          (simple-indentation-rules-make :deindent :on-chars "]"))
+         (rules-union (simple-indentation-rules-union rule-1 rule-2)))
+    (with-temp-buffer
+      (insert "[")
+      (simple-indentation-rules-do rules-union)
+      (should
+       (equal
+        (buffer-substring-no-properties
+         (point-at-bol)
+         (point-at-eol))
+        "  ["))
+      (newline)
+      (insert "  ]")
+      (simple-indentation-rules-do rules-union)
+      (should
+       (equal
+        (buffer-substring-no-properties
+         (point-at-bol)
+         (point-at-eol))
+        "]"))
+      (newline)
+      (simple-indentation-rules-do rules-union)
+      (should
+       (equal
+        (buffer-substring-no-properties
+         (point-at-bol)
+         (point-at-eol))
+        "")))))
 
 ;;; simple-indentation-rules-test.el ends here
