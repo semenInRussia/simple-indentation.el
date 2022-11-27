@@ -26,6 +26,8 @@
 ;;; Code:
 
 (require 'ert)
+(require 'mocker)
+
 (require 'simple-indentation)
 
 (ert-deftest simple-indentation-rules-test-predicate
@@ -426,42 +428,58 @@
 
 (ert-deftest simple-indentation-rules-test-union
     ()
+  (mocker-let
+      ((f1 () ((:occur 1)))
+       (f3 () ((:occur 1)))
+       (f2 () ((:occur 1))))
+    (let* ((rule-1
+            (simple-indentation-rules-make :indent-func 'f1
+                                           :on-chars "1"))
+           (rule-2
+            (simple-indentation-rules-make :indent-func 'f2
+                                           :on-chars "2"))
+           (rule-3
+            (simple-indentation-rules-make :indent-func 'f3
+                                           :on-chars "3"))
+           (rules-union
+            (simple-indentation-rules-union rule-1 rule-2 rule-3)))
+      (with-temp-buffer
+        (insert "1")
+        (simple-indentation-rules-do rules-union)
+        (newline)
+        (insert "3")
+        (simple-indentation-rules-do rules-union)
+        (newline)
+        (insert "2")
+        (simple-indentation-rules-do rules-union)
+        (newline)))))
+
+(ert-deftest simple-indentation-rules-test-union-with-rules-predicates-changing-position
+    ()
   (let* ((simple-indentation-increment-indent-level-function
           (lambda () (insert "  ")))
          (simple-indentation-decrement-indent-level-function
           (lambda () (delete-char 2)))
-         (rule-1
-          (simple-indentation-rules-make :add-indent
-                                         (lambda () (insert "  "))
-                                         :on-chars "["))
-         (rule-2
-          (simple-indentation-rules-make :deindent :on-chars "]"))
-         (rules-union (simple-indentation-rules-union rule-1 rule-2)))
+         (rule-adding-indent
+          (simple-indentation-rules-make
+           :add-indent :on-chars "{"
+           :check-on-prev-line))
+         (deindenting-rule
+          (simple-indentation-rules-make :deindent :on-chars "}"))
+         (rule
+          (simple-indentation-rules-union rule-adding-indent
+                                          deindenting-rule)))
     (with-temp-buffer
-      (insert "[")
-      (simple-indentation-rules-do rules-union)
-      (should
-       (equal
-        (buffer-substring-no-properties
-         (point-at-bol)
-         (point-at-eol))
-        "  ["))
+      (insert "{")
+      (simple-indentation-rules-do rule)
+      (should (equal (thing-at-point 'line) "{"))
       (newline)
-      (insert "  ]")
-      (simple-indentation-rules-do rules-union)
-      (should
-       (equal
-        (buffer-substring-no-properties
-         (point-at-bol)
-         (point-at-eol))
-        "]"))
+      (insert "code...")
+      (simple-indentation-rules-do rule)
+      (should (equal (thing-at-point 'line) "  code..."))
       (newline)
-      (simple-indentation-rules-do rules-union)
-      (should
-       (equal
-        (buffer-substring-no-properties
-         (point-at-bol)
-         (point-at-eol))
-        "")))))
+      (insert "  }")
+      (simple-indentation-rules-do rule)
+      (should (equal (thing-at-point 'line) "}")))))
 
 ;;; simple-indentation-rules-test.el ends here

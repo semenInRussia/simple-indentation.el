@@ -599,6 +599,10 @@ change its predicate to negative."
   "Get predicate of `simple-indentation' RULE."
   (-second-item rule))
 
+(defun simple-indentation-rules-indent-func (rule)
+  "Get indent func of `simple-indentation' RULE."
+  (-first-item rule))
+
 (defun simple-indentation-rules-indent-current-line-p (rule)
   "Check that RULE want to indent current line."
   (-when-let
@@ -652,9 +656,9 @@ COMPOSE-FUNCTION defaults to `or'."
 
 \"RULE should be called\" mean that the indent function of the RULE should be
 called, RULE should be called when its predicate return non-nil"
-  (and
-   (simple-indentation-rules-indent-current-line-p rule)
-   (simple-indentation-rules-call-indent-function rule)))
+  (when (simple-indentation-rules-indent-current-line-p rule)
+    (simple-indentation-rules-call-indent-function rule)
+    t))
 
 (cl-defun simple-indentation-rules-indent-line-with-sorted-rules (sorted-rules
                                                                   &key
@@ -674,13 +678,10 @@ call EACH-LINE-AFTER-INDENT-HOOK"
 Return the rule which will be called when one of the rules' predicates return
 non-nil, if a predicate is found, then call respective indent function."
   (simple-indentation-rules-make
-   :predicate (->>
-               rules
-               (-map 'simple-indentation-rules-predicate)
-               (apply '-orfn))
-   :indent-func (lambda
-                  ()
-                  (simple-indentation-rules-indent-line-with-sorted-rules rules))))
+   :predicate (lambda
+                ()
+                (-any 'simple-indentation-rules-indent-current-line-p rules))
+   :indent-func (lambda () (-find 'simple-indentation-rules-do rules))))
 
 (provide 'simple-indentation-rules)
 ;;; simple-indentation-rules.el ends here
