@@ -5,3 +5,5 @@
 
 ;; Dev dependencies
 (eldev-add-extra-dependencies 'test 'mocker)
+(eldev-add-extra-dependencies 'test 'dash)
+(eldev-add-extra-dependencies 'test 's)
