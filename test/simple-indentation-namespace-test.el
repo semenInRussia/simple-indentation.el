@@ -38,27 +38,21 @@
 (ert-deftest simple-indentation-namespace-test-for-symbols
     ()
   (should
-   (eq
-    (simple-indentation-namespace-for-symbols 'python 'indent-line)
-    'python-indent-line)))
-
-(ert-deftest simple-indentation-namespace-test-for-symbols
-    ()
-  (should
    (equal
     (macroexpand-1
      '(simple-indentation-namespace-defun python print
-       ()
+                                          ()
+                                          "Doc."
+                                          (interactive "dkd")
+                                          (message "body")))
+    '(defun python-print ()
        "Doc."
        (interactive "dkd")
-       (message "body")))
-    '(defun python-print ()
-      "Doc."
-      (interactive "dkd")
-      (message "body")))))
-
-(ert-deftest simple-indentation-namespace-test-for-symbols
-    ()
+       (message "body"))))
+  (should
+   (eq
+    (simple-indentation-namespace-for-symbols 'python 'indent-line)
+    'python-indent-line))
   (should
    (equal
     (macroexpand-1
@@ -69,7 +63,8 @@
     '(defcustom python-name "Doc." :group 'sheet))))
 
 (ert-deftest
-    simple-indentation-namespace-test-var()
+    simple-indentation-namespace-test-var
+    ()
   (should
    (equal
     (macroexpand-1

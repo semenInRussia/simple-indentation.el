@@ -28,20 +28,20 @@
 (require 'ert)
 (require 'simple-indentation-utils)
 
-(ert-deftest simple-indentation-utils-test-previous-line
+(ert-deftest simple-indentation-test-utils-test-previous-line
     ()
   (with-temp-buffer
     (insert "\n")
     (should (simple-indentation-utils-previous-line))
     (should (eq (point-min) (point)))))
 
-(ert-deftest simple-indentation-utils-test-previous-line-in-bob
+(ert-deftest simple-indentation-test-utils-test-previous-line-in-bob
     ()
   (with-temp-buffer
     (should-not (simple-indentation-utils-previous-line))
     (should (eq (point-min) (point)))))
 
-(ert-deftest simple-indentation-utils-test-clear-indention
+(ert-deftest simple-indentation-test-utils-test-clear-indention
     ()
   (with-temp-buffer
     (insert "    this is 4 spaces, this is indention")
@@ -51,14 +51,14 @@
       (thing-at-point 'line t)
       "this is 4 spaces, this is indention"))))
 
-(ert-deftest simple-indentation-utils-test-clear-indention-without-indention
+(ert-deftest simple-indentation-test-utils-test-clear-indention-without-indention
     ()
   (with-temp-buffer
     (insert "No Indention!")
     (simple-indentation-utils-clear-indention)
     (should (equal (thing-at-point 'line t) "No Indention!"))))
 
-(ert-deftest simple-indentation-utils-test-previous-text-line
+(ert-deftest simple-indentation-test-utils-test-previous-text-line
     ()
   (with-temp-buffer
     (insert "Line 1")
@@ -72,14 +72,14 @@
     (should (simple-indentation-utils-previous-text-line))
     (should (equal (thing-at-point 'line t) "Line 1\n"))))
 
-(ert-deftest simple-indentation-utils-test-previous-text-line-in-bob
+(ert-deftest simple-indentation-test-utils-test-previous-text-line-in-bob
     ()
   (with-temp-buffer
     (insert "Line 1")
     (should-not (simple-indentation-utils-previous-text-line))
     (should (equal (thing-at-point 'line t) "Line 1"))))
 
-(ert-deftest simple-indentation-utils-test-previous-code-line
+(ert-deftest simple-indentation-test-utils-test-previous-code-line
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -98,7 +98,7 @@
       "Line 1"))
     (should-not (simple-indentation-utils-previous-code-line))))
 
-(ert-deftest simple-indentation-utils-test-previous-code-line-ignore-empty
+(ert-deftest simple-indentation-test-utils-test-previous-code-line-ignore-empty
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -110,14 +110,14 @@
     (should (simple-indentation-utils-previous-code-line))
     (should (eq (line-number-at-pos (point)) 1))))
 
-(ert-deftest simple-indentation-utils-test-previous-code-line-in-bob
+(ert-deftest simple-indentation-test-utils-test-previous-code-line-in-bob
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
     (insert "Line 1")
     (should-not (simple-indentation-utils-previous-code-line))))
 
-(ert-deftest simple-indentation-utils-test-empty-current-line-p
+(ert-deftest simple-indentation-test-utils-test-empty-current-line-p
     ()
   (with-temp-buffer
     (insert "Line 1")
@@ -125,22 +125,14 @@
     (insert "\n     \t")
     (should (simple-indentation-utils-empty-current-line-p))))
 
-(ert-deftest simple-indentation-utils-test-empty-current-line-p-in-last-empty-line
+(ert-deftest simple-indentation-test-utils-test-empty-current-line-p-in-last-empty-line
     ()
   (with-temp-buffer
     (insert "Some Stupid Texts...")
     (newline)
     (should (simple-indentation-utils-empty-current-line-p))))
 
-(ert-deftest simple-indentation-utils-test-empty-current-line-p
-    ()
-  (with-temp-buffer
-    (insert "Line 1")
-    (should-not (simple-indentation-utils-empty-current-line-p))
-    (insert "\n     \t")
-    (should (simple-indentation-utils-empty-current-line-p))))
-
-(ert-deftest simple-indentation-utils-test-if-empty-clear
+(ert-deftest simple-indentation-test-utils-test-if-empty-clear
     ()
   (with-temp-buffer
     (insert "\t\t\t    ")           ; This is empty line
@@ -149,20 +141,20 @@
     (insert "Tesjtgjseijfjei fjxxt is Text")
     (should-not (equal (buffer-string) ""))))
 
-(ert-deftest simple-indentation-utils-test-current-line
+(ert-deftest simple-indentation-test-utils-test-current-line
     ()
   (with-temp-buffer
     (insert "LINE")
     (should (equal (simple-indentation-utils-current-line) "LINE"))))
 
-(ert-deftest simple-indentation-utils-test-current-line-in-last-empty-line
+(ert-deftest simple-indentation-test-utils-test-current-line-in-last-empty-line
     ()
   (with-temp-buffer
     (insert "Some Clever Texts...")
     (newline)
     (should (equal (simple-indentation-utils-current-line) ""))))
 
-(ert-deftest simple-indentation-utils-compose-with-prev-line
+(ert-deftest simple-indentation-test-utils-compose-with-prev-line
     ()
   (with-temp-buffer
     (insert "LINE 1")
@@ -175,7 +167,7 @@
         'simple-indentation-utils-current-line))
       "LINE 1"))))
 
-(ert-deftest simple-indentation-utils-compose-with-prev-text-line
+(ert-deftest simple-indentation-test-utils-compose-with-prev-text-line
     ()
   (with-temp-buffer
     ;; Text Line
@@ -194,7 +186,7 @@
         'simple-indentation-utils-current-line))
       "LINE 1"))))
 
-(ert-deftest simple-indentation-utils-compose-with-prev-code-line
+(ert-deftest simple-indentation-test-utils-compose-with-prev-code-line
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -210,7 +202,7 @@
         'simple-indentation-utils-current-line))
       "LINE 1"))))
 
-(ert-deftest simple-indentation-utils-test-get-indent-in-str
+(ert-deftest simple-indentation-test-utils-test-get-indent-in-str
     ()
   (should
    (equal
@@ -221,19 +213,19 @@
     (simple-indentation-utils-get-indent-of-string "\t\t CODE")
     "\t\t ")))
 
-(ert-deftest simple-indentation-utils-test-get-indent-in-str-without-indent
+(ert-deftest simple-indentation-test-utils-test-get-indent-in-str-without-indent
     ()
   (should
    (equal (simple-indentation-utils-get-indent-of-string "CODE") "")))
 
-(ert-deftest simple-indentation-utils-test-get-indent-in-line
+(ert-deftest simple-indentation-test-utils-test-get-indent-in-line
     ()
   (with-temp-buffer
     (insert "   Some Gavno Code...")
     (should
      (equal (simple-indentation-utils-get-indent-of-line) "   "))))
 
-(ert-deftest simple-indentation-utils-duplicate-indention-of-prev-line
+(ert-deftest simple-indentation-test-utils-duplicate-indention-of-prev-line
     ()
   (with-temp-buffer
     (insert "    This is 4 spaces, This is INDENT!")
@@ -241,7 +233,7 @@
     (simple-indentation-utils-duplicate-indention-of-prev-line)
     (should (equal (thing-at-point 'line t) "    "))))
 
-(ert-deftest simple-indentation-utils-code-line-has-chars-p-in-comments
+(ert-deftest simple-indentation-test-utils-code-line-has-chars-p-in-comments
     ()
   (with-temp-buffer
     (insert "I am coder ()")
@@ -253,7 +245,7 @@
     (should-not
      (simple-indentation-utils-code-line-has-chars-p "{}"))))
 
-(ert-deftest simple-indentation-utils-code-line-has-chars-p-in-string
+(ert-deftest simple-indentation-test-utils-code-line-has-chars-p-in-string
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -266,8 +258,18 @@
     (should-not
      (simple-indentation-utils-code-line-has-chars-p "(|"))))
 
-(ert-deftest simple-indentation-utils-line-has-keywords
+(ert-deftest simple-indentation-test-utils-line-has-keywords
     ()
+  (with-temp-buffer
+    (insert "I am eating")
+    (should
+     (simple-indentation-utils-line-has-keywords-p
+      '("eating" "drinking")))
+    (newline)
+    (insert "I am eatingnextword")
+    (should-not
+     (simple-indentation-utils-line-has-keywords-p
+      '("eating" "drinking"))))
   (with-temp-buffer
     (insert "I am end")
     (should
@@ -281,7 +283,7 @@
     (should-not
      (simple-indentation-utils-line-has-keywords-p '("end" "final")))))
 
-(ert-deftest simple-indentation-utils-code-p
+(ert-deftest simple-indentation-test-utils-code-p
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -296,7 +298,7 @@
     (insert "Comment")
     (should-not (and "Comment" (simple-indentation-utils-code-p)))))
 
-(ert-deftest simple-indentation-utils-line-comment-p
+(ert-deftest simple-indentation-test-utils-line-comment-p
     ()
   (with-temp-buffer
     (emacs-lisp-mode)
@@ -308,7 +310,7 @@
     (newline)
     (should (simple-indentation-utils-code-p))))
 
-(ert-deftest simple-indentation-utils-code-line-has-keywords
+(ert-deftest simple-indentation-test-utils-code-line-has-keywords
     ()
   (with-temp-buffer
     (insert "I am end")
@@ -322,39 +324,12 @@
      (simple-indentation-utils-code-line-has-keywords
       '("end" "final")))))
 
-(ert-deftest simple-indentation-utils-line-has-keywords
-    ()
-  (with-temp-buffer
-    (insert "I am eating")
-    (should
-     (simple-indentation-utils-line-has-keywords-p
-      '("eating" "drinking")))
-    (newline)
-    (insert "I am eatingnextword")
-    (should-not
-     (simple-indentation-utils-line-has-keywords-p
-      '("eating" "drinking")))))
-
-(ert-deftest simple-indentation-utils-code-line-has-keywords
-    ()
-  (with-temp-buffer
-    (emacs-lisp-mode)
-    (insert "I am end")
-    (should
-     (simple-indentation-utils-code-line-has-keywords
-      '("end" "final")))
-    (beginning-of-line)
-    (insert ";")
-    (should-not
-     (simple-indentation-utils-code-line-has-keywords
-      '("end" "final")))))
-
-(ert-deftest simple-indentation-utils-test-compose-one-argument
+(ert-deftest simple-indentation-test-utils-test-compose-one-argument
     ()
   (should
    (eq (funcall (simple-indentation-utils-compose '1+ '1+) 1) 3)))
 
-(ert-deftest simple-indentation-utils-test-compose-order
+(ert-deftest simple-indentation-test-utils-test-compose-order
     ()
   (should
    (equal
@@ -363,19 +338,19 @@
      2)
     "3")))
 
-(ert-deftest simple-indentation-utils-test-compose-zero-args
+(ert-deftest simple-indentation-test-utils-test-compose-zero-args
     ()
   (should
    (equal
     (funcall (simple-indentation-utils-compose '1+ (-const 3)))
     4)))
 
-(ert-deftest simple-indentation-utils-test-compose-one-plus-args
+(ert-deftest simple-indentation-test-utils-test-compose-one-plus-args
     ()
   (should
    (equal (funcall (simple-indentation-utils-compose '1+ '+) 2 2) 5)))
 
-(ert-deftest simple-indentation-utils-test-compose-rest-args
+(ert-deftest simple-indentation-test-utils-test-compose-rest-args
     ()
   (should
    (equal
@@ -384,7 +359,7 @@
      "a" "b" "c")
     3)))
 
-(ert-deftest simple-indentation-utils-test-including-take-including-while
+(ert-deftest simple-indentation-test-utils-test-including-take-including-while
     ()
   (should
    (equal

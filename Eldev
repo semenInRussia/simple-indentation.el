@@ -1,0 +1,7 @@
+; -*- mode: emacs-lisp; lexical-binding: t -*-
+
+;; Autodetermined by `eldev init'.
+(eldev-use-package-archive 'melpa)
+
+;; Dev dependencies
+(eldev-add-extra-dependencies 'test 'mocker)

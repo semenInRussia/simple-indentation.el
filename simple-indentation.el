@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; Simplify writing major-mode indentation functions.  Alternative to `SMIE'
+;; Simplify writing major-mode indentation functions.  Alternative to `smie'
 
 ;;; Code:
 (require 'cl-lib)
@@ -498,5 +498,4 @@ CLEAR-OLD-INDENTION, CLEAR-EMPTY-LINES see docs."
     (funcall simple-indentation-decrement-indent-level-function)))
 
 (provide 'simple-indentation)
-
 ;;; simple-indentation.el ends here

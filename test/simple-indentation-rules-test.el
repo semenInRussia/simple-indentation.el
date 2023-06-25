@@ -255,7 +255,7 @@
           :indent-func (lambda () (insert "  ")))))
     (with-temp-buffer
       (simple-indentation-rules-call-indent-function rule)
-      (should (equal (thing-at-point 'line t) "  ")))))
+      (should (equal (buffer-string) "  ")))))
 
 (ert-deftest simple-indentation-rules-test-default-indent-func
     ()
@@ -276,7 +276,7 @@
       (setq-local simple-indentation-increment-indent-level-function
                   (lambda () (insert "  ")))
       (simple-indentation-rules-call-indent-function rule)
-      (should (equal (thing-at-point 'line t) "  ")))))
+      (should (equal (buffer-string) "  ")))))
 
 (ert-deftest simple-indentation-rules-test-deindent
     ()

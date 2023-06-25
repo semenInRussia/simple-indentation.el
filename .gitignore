@@ -54,3 +54,7 @@ flycheck_*.el
 
 
 # End of https://www.toptal.com/developers/gitignore/api/emacs
+
+# Added automatically by `eldev init'.
+/.eldev
+/Eldev-local

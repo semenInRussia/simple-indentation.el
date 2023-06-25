@@ -1,5 +1,8 @@
 # simple-indentation
-I (repo) renamed from `simple-indention` to `simple-indentation`, How bad that?
+
+[![Run Tests and Eldev Linter](https://github.com/semenInRussia/just.el/actions/workflows/test.yml/badge.svg)](https://github.com/semenInRussia/simple-indentation.el/actions/workflows/test.yml)
+
+
 ## Summary
 
 Simple Define Indent's Funcs for Your Cool Major Modes in Emacs
