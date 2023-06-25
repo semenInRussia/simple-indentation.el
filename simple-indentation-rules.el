@@ -557,7 +557,7 @@ change its predicate to negative."
 (defun simple-indentation-rules-predicate-with-possible-action-before (rule
                                                                        ;;nofmt
                                                                        func)
-  "Get a function, returning RULE predicate's result or a RULE predicate result with FUNC call before."
+  "Get a function, that return RULE predicate's result or with FUNC call before."
   ;; sorry all to this long message
   (lambda ()
     (or

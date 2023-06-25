@@ -45,8 +45,8 @@ Example:
                                    embeded-mode-hook
                                    embedded-new-buffer-hook)
 
-    --→ (simple-indentation-hooks-union-to 'calc-embedded-hook
-                        'calc-embeded-mode-hook
+    --→ (simple-indentation-hooks-union-to \='calc-embedded-hook
+                        \='calc-embeded-mode-hook
                         'calc-embedded-new-buffer-hook)"
   (setq dest-hook
         (simple-indentation-namespace-for-symbols namespace dest-hook))

@@ -60,14 +60,12 @@ If impossible go to previous line, then return nil."
 
 Return non-nil, when successively."
   (interactive)
-  (let ((starting-point (point))
-        traveled-lines stop)
-    (cl-block nil
-      (while t
-        (unless (simple-indentation-utils-previous-text-line)
-          (cl-return nil))
-        (unless (simple-indentation-utils-comment-line-p)
-          (cl-return t))))))
+  (cl-block nil
+    (while t
+      (unless (simple-indentation-utils-previous-text-line)
+        (cl-return nil))
+      (unless (simple-indentation-utils-comment-line-p)
+        (cl-return t)))))
 
 (defun simple-indentation-utils-regexp-in-string-start (regexp)
   "Make REGEXP, whcih match on REGEXP only in start of string."
@@ -153,7 +151,7 @@ BOUND."
   "If current line is empty, then clear line and navigate to next line."
   (interactive)
   (when (simple-indentation-utils-empty-current-line-p)
-    (delete-region (point-at-bol) (point-at-eol))
+    (delete-region (pos-bol) (pos-eol))
     (forward-line)))
 
 (defun simple-indentation-utils-current-line ()
@@ -167,7 +165,7 @@ BOUND."
 
 (defun simple-indentation-utils-comment-line-p ()
   "Return t, when current line isn't a comment line."
-  (comment-only-p (point-at-bol) (point-at-eol)))
+  (comment-only-p (pos-bol) (pos-eol)))
 
 (defun simple-indentation-utils-code-line-has-chars-p (chars)
   "Return t, if current line, ignoring strings and comments has one of CHARS."
@@ -178,7 +176,7 @@ BOUND."
 
 (defun simple-indentation-utils-code-line-has-one-char-p (char)
   "Return t, if current line, ignoring strings and comments has CHAR."
-  (let ((end (point-at-eol))
+  (let ((end (pos-eol))
         found)
     (save-excursion
       (beginning-of-line)
@@ -202,7 +200,7 @@ with delimeters around"
 placed at the current line."
   (save-excursion
     (beginning-of-line)
-    (simple-indentation-utils-forward-word keyword (point-at-eol))))
+    (simple-indentation-utils-forward-word keyword (pos-eol))))
 
 (defun simple-indentation-utils-forward-word (word &optional bound)
   "Go to the next matched WORD.
@@ -225,7 +223,7 @@ If the WORD is not found, then return nil, otherwise return non-nil."
 (defun simple-indentation-utils-code-line-has-one-keyword-p (keyword)
   "Return non-nil, current line ignoring comments and string consists KEYWORD."
   (save-excursion
-    (let ((end (point-at-eol))
+    (let ((end (pos-eol))
           found)
       (beginning-of-line)
       (while (and
